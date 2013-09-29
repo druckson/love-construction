@@ -24,19 +24,19 @@ function love.load()
 
         local childBlock = {}
         transform:add(childBlock, 0.5, 0, 0, mainBlock)
-        display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
+        --display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
 
         childBlock = {}
         transform:add(childBlock, -0.5, 0, 0, mainBlock)
-        display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
+        --display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
 
         childBlock = {}
         transform:add(childBlock, 0, 0.5, 0, mainBlock)
-        display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
+        --display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
 
         childBlock = {}
         transform:add(childBlock, 0, -0.5, 0, mainBlock)
-        display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
+        --display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
     end
 
     local p1 = {}

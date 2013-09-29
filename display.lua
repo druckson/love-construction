@@ -24,7 +24,6 @@ function Display:displayChildren(object)
     love.graphics.translate(object.transform.position.x, object.transform.position.y)
     love.graphics.rotate(object.transform.rotation)
 
-
     if object.display ~= nil then
         love.graphics.setColor(object.display.color)
 
@@ -51,6 +50,7 @@ end
 
 function Display:setScreenSize(x, y)
     love.graphics.setMode(x, y, true, true, 3)
+    love.mouse.setVisible(false)
     self.screenSize = vector.new(x, y)
 end
 
@@ -70,10 +70,12 @@ function Display:display()
     love.graphics.setBackgroundColor(255, 255, 255, 255)
     love.graphics.clear()
 
+    local zoom = self.camera.zoom
+
     love.graphics.push()
     love.graphics.translate(self.screenSize.x/2, self.screenSize.y/2)
     love.graphics.rotate(-self.camera.rotation)
-    love.graphics.scale(self.camera.zoom, self.camera.zoom)
+    love.graphics.scale(zoom, zoom)
     love.graphics.translate(-self.camera.position.x, -self.camera.position.y)
 
     for _, object in pairs(self.objects) do
