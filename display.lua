@@ -1,6 +1,7 @@
 local vector = require "../hump/vector"
 
 local Display = {
+    screenSize = vector.new(300, 300),
     camera = {
         position = vector.new(0, 0),
         rotation = 0,
@@ -23,19 +24,22 @@ function Display:displayChildren(object)
     love.graphics.translate(object.transform.position.x, object.transform.position.y)
     love.graphics.rotate(object.transform.rotation)
 
-    love.graphics.setColor(object.display.color)
 
-    local properties = object.display.properties
-    if object.display.shape == "rect" then
-        love.graphics.rectangle("fill", 0, 0,
-                                properties.size.x, 
-                                properties.size.y)
-    elseif object.display.shape == "square" then
-        love.graphics.rectangle("fill", 0, 0,
-                                properties.size, 
-                                properties.size)
-    elseif object.display.shape == "circle" then
-        love.graphics.circle("fill", 0, 0, properties.radius)
+    if object.display ~= nil then
+        love.graphics.setColor(object.display.color)
+
+        local properties = object.display.properties
+        if object.display.shape == "rect" then
+            love.graphics.rectangle("fill", -properties.size.x/2, -properties.size.y/2,
+                                    properties.size.x, 
+                                    properties.size.y)
+        elseif object.display.shape == "square" then
+            love.graphics.rectangle("fill", -properties.size/2, -properties.size/2,
+                                    properties.size, 
+                                    properties.size)
+        elseif object.display.shape == "circle" then
+            love.graphics.circle("fill", -properties.radius/2, -properties.radius/2, properties.radius)
+        end
     end
 
     for _, child in pairs(object.transform.children) do
@@ -43,6 +47,11 @@ function Display:displayChildren(object)
     end
 
     love.graphics.pop()
+end
+
+function Display:setScreenSize(x, y)
+    love.graphics.setMode(x, y, true, true, 3)
+    self.screenSize = vector.new(x, y)
 end
 
 function Display:moveCamera(x, y)
@@ -60,12 +69,12 @@ end
 function Display:display()
     love.graphics.setBackgroundColor(255, 255, 255, 255)
     love.graphics.clear()
-    love.graphics.push()
 
-    love.graphics.translate(150, 150)
-    love.graphics.rotate(self.camera.rotation)
+    love.graphics.push()
+    love.graphics.translate(self.screenSize.x/2, self.screenSize.y/2)
+    love.graphics.rotate(-self.camera.rotation)
     love.graphics.scale(self.camera.zoom, self.camera.zoom)
-    love.graphics.translate(self.camera.position.x, self.camera.position.y)
+    love.graphics.translate(-self.camera.position.x, -self.camera.position.y)
 
     for _, object in pairs(self.objects) do
         if object.transform.parent == nil then
@@ -73,6 +82,8 @@ function Display:display()
         end
     end
     love.graphics.pop()
+
+    love.graphics.print("FPS: "..love.timer.getFPS(), 10, 10)
 end
 
 return Display
