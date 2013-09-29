@@ -46,15 +46,15 @@ function Display:displayChildren(object)
 end
 
 function Display:moveCamera(x, y)
-    self.camera.position = self.camera.position + vector.new(x, y)
+    self.camera.position = vector.new(x, y)
 end
 
 function Display:rotateCamera(r)
-    self.camera.rotation = self.camera.rotation + r
+    self.camera.rotation = r
 end
 
 function Display:zoomCamera(z)
-    self.camera.zoom = self.camera.zoom + z
+    self.camera.zoom = z
 end
 
 function Display:display()
