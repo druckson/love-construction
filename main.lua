@@ -13,7 +13,7 @@ function love.load()
     transform:add(world, worldSize.x/2, worldSize.y/2, 0)
     display:add(world, "rect", {200, 200, 200, 255}, {size=worldSize})
 
-    for i=0,1000 do
+    for i=0,100 do
         local mainBlock = {}
         transform:add(mainBlock, 
             math.random(worldSize.x),
@@ -24,19 +24,19 @@ function love.load()
 
         local childBlock = {}
         transform:add(childBlock, 0.5, 0, 0, mainBlock)
-        --display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
+        display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
 
         childBlock = {}
-        transform:add(childBlock, -0.5, 0, 0, mainBlock)
-        --display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
+        transform:add(childBlock, 0, 0.5, math.pi/2, mainBlock)
+        display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
 
         childBlock = {}
-        transform:add(childBlock, 0, 0.5, 0, mainBlock)
-        --display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
+        transform:add(childBlock, -0.5, 0, math.pi, mainBlock)
+        display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
 
         childBlock = {}
-        transform:add(childBlock, 0, -0.5, 0, mainBlock)
-        --display:add(childBlock, "square", {60, 60, 60, 255}, {size=0.1})
+        transform:add(childBlock, 0, -0.5, 3*math.pi/2, mainBlock)
+        display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
     end
 
     local p1 = {}
@@ -45,7 +45,7 @@ function love.load()
         math.random(worldSize.y),
         0)
     display:add(p1, "square", {30, 90, 30, 255}, {size=1})
-    player:set(p1, 10)
+    player:set(p1, 100)
 end
 
 function love.keypressed(k)

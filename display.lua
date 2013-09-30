@@ -38,6 +38,15 @@ function Display:displayChildren(object)
                                     properties.size)
         elseif object.display.shape == "circle" then
             love.graphics.circle("fill", -properties.radius/2, -properties.radius/2, properties.radius)
+        elseif object.display.shape == "triangle" then
+            local points = {}
+            love.graphics.polygon("fill", {
+                math.cos(0)*properties.radius, 
+                math.sin(0)*properties.radius,
+                math.cos(2*math.pi/3)*properties.radius, 
+                math.sin(2*math.pi/3)*properties.radius,
+                math.cos(4*math.pi/3)*properties.radius, 
+                math.sin(4*math.pi/3)*properties.radius})
         end
     end
 
