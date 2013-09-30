@@ -44,7 +44,7 @@ function Player:update(dt)
                    moveForward*math.cos(-self.object.transform.rotation) +
                    moveSideways*math.sin(-self.object.transform.rotation))
     self.object.transform.rotation = rotation
-    self.object.player.zoom = self.object.player.zoom + zoom
+    self.object.player.zoom = math.max(0.01, math.min(100, self.object.player.zoom + zoom))
 
     display:moveCamera(self.object.transform.position.x,
                        self.object.transform.position.y)

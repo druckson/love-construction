@@ -45,7 +45,7 @@ function love.load()
         math.random(worldSize.y),
         0)
     display:add(p1, "square", {30, 90, 30, 255}, {size=1})
-    player:set(p1, 100)
+    player:set(p1, 1)
 end
 
 function love.keypressed(k)

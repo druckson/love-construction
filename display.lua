@@ -79,7 +79,7 @@ function Display:display()
     love.graphics.setBackgroundColor(255, 255, 255, 255)
     love.graphics.clear()
 
-    local zoom = self.camera.zoom
+    local zoom = 100 / self.camera.zoom
 
     love.graphics.push()
     love.graphics.translate(self.screenSize.x/2, self.screenSize.y/2)
