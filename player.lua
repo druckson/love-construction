@@ -27,7 +27,7 @@ function Player:update(dt)
         love.mouse.setPosition(
             love.mouse.getX() - (math.pi*2)/0.005,
             love.mouse.getY())
-    elseif rotation < 0 then
+    elseif rotation <= 0 then
         love.mouse.setPosition(
             love.mouse.getX() + (math.pi*2)/0.005,
             love.mouse.getY())
