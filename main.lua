@@ -35,6 +35,7 @@ function createBlock()
     transform:add(childBlock, 0, -0.5, 3*math.pi/2, mainBlock)
     display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
     construction:add(childBlock)
+    return mainBlock
 end
 
 function love.load()   
@@ -44,9 +45,14 @@ function love.load()
     transform:add(world, worldSize.x/2, worldSize.y/2, 0)
     display:add(world, "rect", {200, 200, 200, 255}, {size=worldSize})
 
+    local parentBlocks = {}
     for i=0,1 do
-        createBlock()
+        table.insert(parentBlocks, createBlock())
     end
+
+    print(parentBlocks[1].transform)
+    construction:connect(parentBlocks[1].transform.children[1],
+                         parentBlocks[2].transform.children[1])
 
     local p1 = {}
     transform:add(p1, 

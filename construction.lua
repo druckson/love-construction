@@ -40,7 +40,7 @@ function Construction:connect(o1, o2)
     local o1par = getMaximalAncestor(o1)
     local o2par = getMaximalAncestor(o2)
     
-    o1par.transform.position = o2par.transform.position + vector.new(0, 10)
+    o1par.transform.position = o2par.transform.position + vector.new(0, 1)
 end
 
 return Construction
