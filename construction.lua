@@ -5,8 +5,7 @@ local Construction = {
 }
 
 function Construction:add(object)
-    object.construction = {
-    }
+    object.construction = {}
     table.insert(self.objects, object)
 end
 
@@ -39,8 +38,15 @@ function Construction:connect(o1, o2)
 
     local o1par = getMaximalAncestor(o1)
     local o2par = getMaximalAncestor(o2)
-    
-    o1par.transform.position = o2par.transform.position + vector.new(0, 1)
+
+    local dist = o1rel:len() + o2rel:len()
+    local direction = o1rel:normalized()
+    direction = vector.new(math.sin() -
+                           math.cos(),
+                           math.cos() +
+                           math.sin())
+
+    o2par.transform.position = o1par.transform.position + (direction * dist)
 end
 
 return Construction
