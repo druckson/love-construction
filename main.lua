@@ -54,15 +54,10 @@ function love.load()
         table.insert(parentBlocks, createBlock())
     end
 
-    print(parentBlocks[1].transform)
-    construction:connect(parentBlocks[1].transform.children[1],
-                         parentBlocks[2].transform.children[1])
+    construction:connect(parentBlocks[1].children[1],
+                         parentBlocks[2].children[1])
 
-    local p1 = {}
-    transform:add(p1, 
-        math.random(worldSize.x),
-        math.random(worldSize.y),
-        0)
+    local p1 = object.new()
     display:add(p1, "square", {30, 90, 30, 255}, {size=1})
     player:set(p1, 1)
 end
