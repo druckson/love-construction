@@ -1,6 +1,7 @@
 local vector = require "lib/hump/vector"
 
 local Matrix = {}
+Matrix.__index = Matrix
 
 function Matrix.new()
     local newMatrix = {
@@ -13,16 +14,16 @@ function Matrix.new()
 end
 
 function Matrix:getRow(y)
-    return {self[0][y], self[1][y], self[2][y]}
+    return {self[1][y], self[2][y], self[3][y]}
 end
 
 function Matrix:getColumn(x)
-    return {self[x][0], self[x][1], self[x][2]}
+    return {self[x][1], self[x][2], self[x][3]}
 end
 
-function linearCombine(v1, v2)
+local function linearCombine(v1, v2)
     local total = 0
-    for i=0,2 do
+    for i=1,3 do
         total = total + v1[i]*v2[i]
     end
     return total
@@ -35,13 +36,13 @@ function Matrix:__mul(other)
 
     if (getmetatable(other) == Matrix) then
         return Matrix.new({
-            {combine(0, 0), combine(1, 0), combine(2, 0)},
-            {combine(0, 1), combine(1, 1), combine(2, 1)},
-            {combine(0, 2), combine(1, 2), combine(2, 2)}
+            {combine(1, 1), combine(2, 1), combine(3, 1)},
+            {combine(1, 2), combine(2, 2), combine(3, 2)},
+            {combine(1, 3), combine(2, 3), combine(3, 3)}
         })
     elseif (isVector(other)) then
-        return vector.new(self[0][0]*other.x + self[1][0]*other.x + self[2][0]*other.x,
-                          self[0][1]*other.y + self[1][1]*other.y + self[2][1]*other.y)
+        return vector.new(self[1][1]*other.x + self[2][1]*other.x + self[3][1]*other.x,
+                          self[1][2]*other.y + self[2][2]*other.y + self[3][2]*other.y)
     end
 end
 
