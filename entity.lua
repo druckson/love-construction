@@ -1,27 +1,27 @@
 local vector = require "lib/hump/vector"
 local transform = require "utils/transform"
 
-local Object = {
+local Entity = {
     objects = {}
 }
-Object.__index = Object
+Entity.__index = Entity
 
-function Object.new(parent)
-    local newObject = {
+function Entity.new(parent)
+    local newEntity = {
         transform = transform(),
         children = {},
         parent = nil
     }
 
     if parent ~= nil then
-        assert(getmetatable(parent) == Object)
-        parent:addChild(newObject)
+        assert(getmetatable(parent) == Entity)
+        parent:addChild(newEntity)
     end
 
-    return setmetatable(newObject, Object)
+    return setmetatable(newEntity, Entity)
 end
 
-function Object:addChild(child)
+function Entity:addChild(child)
     if child.parent ~= nil then
         table.remove(child.parent.children, child)
     end
@@ -29,4 +29,4 @@ function Object:addChild(child)
     table.insert(self.children, child)
 end
 
-return setmetatable({new = Object.new}, {Object.new})
+return setmetatable({new = Entity.new}, {Entity.new})
