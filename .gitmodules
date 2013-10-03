@@ -4,3 +4,6 @@
 [submodule "lib/hump"]
 	path = lib/hump
 	url = https://github.com/vrld/hump.git
+[submodule "lib/leaf"]
+	path = lib/leaf
+	url = https://github.com/minism/leaf.git
