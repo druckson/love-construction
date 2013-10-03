@@ -1,4 +1,4 @@
-local vector = require "../hump/vector"
+local vector = require "lib/hump/vector"
 
 local Transform = {
     objects = {}
@@ -14,6 +14,10 @@ function Transform:add(object, x, y, r, parent)
         self:addChild(parent, object)
     end
     table.insert(self.objects, object)
+end
+
+function Transform:getAbsoluteTransform()
+    
 end
 
 function Transform:addChild(parent, child)

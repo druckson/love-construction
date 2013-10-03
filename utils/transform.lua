@@ -2,17 +2,18 @@ local vector = require "../../hump/vector"
 
 local Transform = {}
 
-function Transform.new(x, y, r)
+function Transform.new(position, r)
     local newTransform = {
-        position = vector.new(x, y),
-        rotation = r
+        position = position or vector.new(0, 0),
+        rotation = r or 0
     }
 
     return setmetatable(newTransform, Transform)
 end
 
 function Transform:setParent(parent)
-    
+    local absolute = self:getAbsolute()
+    parent
 end
 
 function Transform:getAbsolute()

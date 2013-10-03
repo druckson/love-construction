@@ -1,4 +1,4 @@
-local vector = require "../hump/vector"
+local vector = require "lib/hump/vector"
 
 local Construction = {
     objects = {}
@@ -16,6 +16,16 @@ function getRelativePosition(object)
         return vector.new(0, 0)
     else
         return object.transform.position + getRelativePosition(object.transform.parent)
+    end
+end
+
+function getRelativeRotation(object)
+    assert(object.transform ~= nil)
+
+    if object.transform.parent == nil then
+        return 0
+    else
+        return object.transform.rotation + getRelativeRotation(object.transform.parent)
     end
 end
 
@@ -41,10 +51,6 @@ function Construction:connect(o1, o2)
 
     local dist = o1rel:len() + o2rel:len()
     local direction = o1rel:normalized()
-    direction = vector.new(math.sin() -
-                           math.cos(),
-                           math.cos() +
-                           math.sin())
 
     o2par.transform.position = o1par.transform.position + (direction * dist)
 end

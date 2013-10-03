@@ -1,4 +1,4 @@
-local vector = require "../hump/vector"
+local vector = require "lib/hump/vector"
 
 local Display = {
     screenSize = vector.new(300, 300),
