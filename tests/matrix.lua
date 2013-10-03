@@ -1,6 +1,7 @@
 require "lunit"
 local vector = require "../lib/hump/vector"
 local matrix = require "../utils/matrix"
+local math = require "math"
 
 module("matrix", lunit.testcase)
 
@@ -66,7 +67,7 @@ function test_vecMult()
     assert(v2.y == 2)
 end
 
-function test_vecMult2()
+function test_scale()
     local m1 = matrix.scale(2)
     local v1 = vector.new(1, 2)
     local v2 = m1 * v1
@@ -74,4 +75,24 @@ function test_vecMult2()
     assert(v2 ~= nil)
     assert(v2.x == 2)
     assert(v2.y == 4)
+end
+
+function test_translate()
+    local m1 = matrix.translate(1, 1)
+    local v1 = vector.new(1, 2)
+    local v2 = m1 * v1
+
+    assert(v2 ~= nil)
+    assert(v2.x == 2)
+    assert(v2.y == 3)
+end
+
+function test_rotate()
+    local m1 = matrix.rotate(math.pi)
+    local v1 = vector.new(1, 2)
+    local v2 = m1 * v1
+
+    assert(v2 ~= nil)
+    assert(v2.x == -1)
+    assert(v2.y == -2)
 end

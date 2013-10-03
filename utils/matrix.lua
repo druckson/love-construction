@@ -1,4 +1,5 @@
 local vector = require "../lib/hump/vector"
+local math = require "math"
 
 local Matrix = {}
 Matrix.__index = Matrix
@@ -13,11 +14,27 @@ function Matrix.new(value)
     return setmetatable(newMatrix, Matrix)
 end
 
-function Matrix.scale(scaleFactor)
+function Matrix.scale(s)
     return Matrix.new({
-        {scaleFactor, 0, 0},
-        {0, scaleFactor, 0},
+        {s, 0, 0},
+        {0, s, 0},
         {0, 0, 1}
+    })
+end
+
+function Matrix.rotate(r)
+    return Matrix.new({
+        {math.cos(r), -math.sin(r), 0},
+        {math.sin(r),  math.cos(r), 0},
+        {          0,            0, 1}
+    })
+end
+
+function Matrix.translate(x, y)
+    return Matrix.new({
+        {1, 0, 0},
+        {0, 1, 0},
+        {x, y, 1}
     })
 end
 
@@ -49,8 +66,8 @@ function Matrix.__mul(self, other)
             {combine(1, 3), combine(2, 3), combine(3, 3)}
         })
     elseif (vector.isvector(other)) then
-        return vector.new(self[1][1]*other.x + self[2][1]*other.x + self[3][1]*other.x,
-                          self[1][2]*other.y + self[2][2]*other.y + self[3][2]*other.y)
+        return vector.new(self[1][1]*other.x + self[2][1]*other.y + self[3][1],
+                          self[1][2]*other.x + self[2][2]*other.y + self[3][2])
     end
     assert(false, "Expected matrix or vector in multiplication")
 end
