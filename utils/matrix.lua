@@ -1,10 +1,9 @@
-local vector = require "../../hump/vector"
-local 
+local vector = require "lib/hump/vector"
 
 local Matrix = {}
 
-function Matrix.new(value)
-    local newMatrix = value or {
+function Matrix.new()
+    local newMatrix = {
         {1, 0, 0},
         {0, 1, 0},
         {0, 0, 1}
@@ -35,7 +34,6 @@ function Matrix:__mul(other)
     end
 
     if (getmetatable(other) == Matrix) then
-        local m1 = self, m2 = other
         return Matrix.new({
             {combine(0, 0), combine(1, 0), combine(2, 0)},
             {combine(0, 1), combine(1, 1), combine(2, 1)},
@@ -47,4 +45,4 @@ function Matrix:__mul(other)
     end
 end
 
-return setmetatable({}, {__call = Matrix.new})
+return setmetatable({new = Matrix.new}, {__call = Matrix.new})

@@ -1,5 +1,5 @@
 local vector = require "lib/hump/vector"
-local transform = require "transform"
+local object = require "object"
 local display = require "display"
 local player = require "player"
 local construction = require "construction"
@@ -8,31 +8,35 @@ local worldSize = vector.new(10, 10)
 local screenSize = vector.new(1366, 768)
 
 function createBlock()
-    local mainBlock = {}
-    transform:add(mainBlock, 
+    local mainBlock = object.new()
+    mainBlock.transform:setPosition(
         math.random(worldSize.x),
-        math.random(worldSize.y),
+        math.random(worldSize.y))
+    mainBlock.transform:setRotation(
         math.random(math.pi))
     
     display:add(mainBlock, "square", {90, 90, 90, 255}, {size=1})
     
-    local childBlock = {}
-    transform:add(childBlock, 0.5, 0, 0, mainBlock)
+    local childBlock = object.new(mainBlock)
+    childBlock.transform:setPosition(0.5, 0)
     display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
     construction:add(childBlock)
 
-    childBlock = {}
-    transform:add(childBlock, 0, 0.5, math.pi/2, mainBlock)
+    childBlock = object.new(mainBlock)
+    childBlock.transform:setPosition(0, 0.5)
+    childBlock.transform:setRotation(math.pi/2)
     display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
     construction:add(childBlock)
     
-    childBlock = {}
-    transform:add(childBlock, -0.5, 0, math.pi, mainBlock)
+    childBlock = object.new(mainBlock)
+    childBlock.transform:setPosition(-0.5, 0)
+    childBlock.transform:setRotation(math.pi)
     display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
     construction:add(childBlock)
     
-    childBlock = {}
-    transform:add(childBlock, 0, -0.5, 3*math.pi/2, mainBlock)
+    childBlock = object.new(mainBlock)
+    childBlock.transform:setPosition(0, 0.5)
+    childBlock.transform:setRotation(3*math.pi/2)
     display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
     construction:add(childBlock)
     return mainBlock
@@ -41,8 +45,8 @@ end
 function love.load()   
     display:setScreenSize(screenSize.x, screenSize.y)
 
-    local world = {}
-    transform:add(world, worldSize.x/2, worldSize.y/2, 0)
+    local world = object.new()
+    world.transform:setPosition(worldSize.x/2, worldSize.y/2)
     display:add(world, "rect", {200, 200, 200, 255}, {size=worldSize})
 
     local parentBlocks = {}

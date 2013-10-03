@@ -19,7 +19,7 @@ function Object.new(parent)
     return newObject
 end
 
-function Transform:addChild(child)
+function Object:addChild(child)
     if child.parent ~= nil then
         table.remove(child.parent.children, child)
     end
