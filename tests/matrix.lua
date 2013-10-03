@@ -1,4 +1,5 @@
 require "lunit"
+local vector = require "../lib/hump/vector"
 local matrix = require "../utils/matrix"
 
 module("matrix", lunit.testcase)
@@ -20,8 +21,57 @@ function test_value()
     assert(m[3] ~= nil)
 end
 
+function test_identity()
+    local m = matrix.new()
+
+    assert(m[1][1] == 1)
+    assert(m[1][2] == 0)
+    assert(m[1][3] == 0)
+
+    assert(m[2][1] == 0)
+    assert(m[2][2] == 1)
+    assert(m[2][3] == 0)
+
+    assert(m[3][1] == 0)
+    assert(m[3][2] == 0)
+    assert(m[3][3] == 1)
+end
+
 function test_mult()
     local m1 = matrix.new()
     local m2 = matrix.new()
-    assert(m1 * m2 ~= nil)
+    local m3 = m1 * m2
+    assert(m3 ~= nil)
+
+    assert(m3[1][1] == 1)
+    assert(m3[1][2] == 0)
+    assert(m3[1][3] == 0)
+
+    assert(m3[2][1] == 0)
+    assert(m3[2][2] == 1)
+    assert(m3[2][3] == 0)
+
+    assert(m3[3][1] == 0)
+    assert(m3[3][2] == 0)
+    assert(m3[3][3] == 1)
+end
+
+function test_vecMult()
+    local m1 = matrix.new()
+    local v1 = vector.new(1, 2)
+    local v2 = m1 * v1
+
+    assert(v2 ~= nil)
+    assert(v2.x == 1)
+    assert(v2.y == 2)
+end
+
+function test_vecMult2()
+    local m1 = matrix.scale(2)
+    local v1 = vector.new(1, 2)
+    local v2 = m1 * v1
+
+    assert(v2 ~= nil)
+    assert(v2.x == 2)
+    assert(v2.y == 4)
 end
