@@ -4,6 +4,7 @@ local transform = require "utils/transform"
 local Object = {
     objects = {}
 }
+Object.__index = Object
 
 function Object.new(parent)
     local newObject = {
@@ -13,10 +14,11 @@ function Object.new(parent)
     }
 
     if parent ~= nil then
+        assert(getmetatable(parent) == Object)
         parent:addChild(newObject)
     end
 
-    return newObject
+    return setmetatable(newObject, Object)
 end
 
 function Object:addChild(child)
