@@ -1,0 +1,6 @@
+[submodule "lib/numlua"]
+	path = lib/numlua
+	url = https://github.com/carvalho/numlua.git
+[submodule "lib/hump"]
+	path = lib/hump
+	url = https://github.com/vrld/hump.git
