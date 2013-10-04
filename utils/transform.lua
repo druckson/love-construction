@@ -4,10 +4,10 @@ local matrix = require "utils/matrix"
 local Transform = {}
 Transform.__index = Transform
 
-function Transform.new(position, r)
+function Transform.new()
     local newTransform = {
-        position = position or vector.new(0, 0),
-        rotation = r or 0
+        position = vector.new(0, 0),
+        rotation = 0
     }
 
     return setmetatable(newTransform, Transform)
@@ -21,16 +21,16 @@ function Transform:setRotation(r)
     self.rotation = r
 end
 
-function Transform:getAbsolute()
+function Transform:getMatrix()
+    return matrix.translate(self.position.x, self.position.y) * matrix.rotate(self.rotation)
+end
+
+function Transform:getAbsoluteTransformation()
     if (self.parent == nil) then
-        return self
+        return self:getMatrix()
     else
-        return getAbsolute(self.parent) * self
+        return getAbsolute(self.parent) * self:getMatrix()
     end
 end
 
-function Transform.__mul(t1, t2)
-    
-end
-
-return setmetatable({}, {__call = Transform.new})
+return setmetatable(Transform, {__call = Transform.new})
