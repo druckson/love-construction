@@ -35,7 +35,7 @@ function createBlock()
     construction:add(childBlock)
     
     childBlock = entity.new(mainBlock)
-    childBlock.transform:setPosition(0, 0.5)
+    childBlock.transform:setPosition(0, -0.5)
     childBlock.transform:setRotation(3*math.pi/2)
     display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
     construction:add(childBlock)
@@ -58,6 +58,7 @@ function love.load()
                          parentBlocks[2].children[1])
 
     local p1 = entity.new()
+    p1.transform:setPosition(1, 1)
     display:add(p1, "square", {30, 90, 30, 255}, {size=1})
     player:set(p1, 1)
 end

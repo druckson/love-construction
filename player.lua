@@ -39,8 +39,8 @@ function Player:update(dt)
     if love.keyboard.isDown("x") then zoom = zoom + zoomSpeed end
     if love.keyboard.isDown("c") then zoom = zoom - zoomSpeed end
 
-    local velocity = matrix.rotate(self.object.transform.rotation) *
-                     vector.new(moveForward, moveSideways)
+    local velocity = matrix.rotate(-self.object.transform.rotation) *
+                     vector.new(-moveSideways, moveForward)
     print(self.object.transform.position)
     print(velocity)
 
