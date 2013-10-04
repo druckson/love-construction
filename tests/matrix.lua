@@ -1,28 +1,26 @@
-require "lunit"
 local vector = require "../lib/hump/vector"
 local matrix = require "../utils/matrix"
 local math = require "math"
 
-module("matrix", lunit.testcase)
 
-function test_setup()
+describe("Test setup", function()
     local m = matrix.new()
     assert(m ~= nil)
-end
+end)
 
-function test_func()
+describe("Test func", function()
     local m = matrix.new()
     assert(m.getRow ~= nil)
-end
+end)
 
-function test_value()
+describe("Test value", function()
     local m = matrix.new()
     assert(m[1] ~= nil)
     assert(m[2] ~= nil)
     assert(m[3] ~= nil)
-end
+end)
 
-function test_identity()
+describe("Test identity", function()
     local m = matrix.new()
 
     assert(m[1][1] == 1)
@@ -36,9 +34,9 @@ function test_identity()
     assert(m[3][1] == 0)
     assert(m[3][2] == 0)
     assert(m[3][3] == 1)
-end
+end)
 
-function test_mult()
+describe("Test mult", function()
     local m1 = matrix.new()
     local m2 = matrix.new()
     local m3 = m1 * m2
@@ -55,9 +53,9 @@ function test_mult()
     assert(m3[3][1] == 0)
     assert(m3[3][2] == 0)
     assert(m3[3][3] == 1)
-end
+end)
 
-function test_vecMult()
+describe("Test vector multiplication", function()
     local m1 = matrix.new()
     local v1 = vector.new(1, 2)
     local v2 = m1 * v1
@@ -65,9 +63,9 @@ function test_vecMult()
     assert(v2 ~= nil)
     assert(v2.x == 1)
     assert(v2.y == 2)
-end
+end)
 
-function test_scale()
+describe("Test scale", function()
     local m1 = matrix.scale(2)
     local v1 = vector.new(1, 2)
     local v2 = m1 * v1
@@ -75,9 +73,9 @@ function test_scale()
     assert(v2 ~= nil)
     assert(v2.x == 2)
     assert(v2.y == 4)
-end
+end)
 
-function test_translate()
+describe("Test translate", function()
     local m1 = matrix.translate(1, 1)
     local v1 = vector.new(1, 2)
     local v2 = m1 * v1
@@ -85,14 +83,15 @@ function test_translate()
     assert(v2 ~= nil)
     assert(v2.x == 2)
     assert(v2.y == 3)
-end
+end)
 
-function test_rotate()
+describe("Test rotate", function()
     local m1 = matrix.rotate(math.pi)
     local v1 = vector.new(1, 2)
     local v2 = m1 * v1
 
+    print(v2)
     assert(v2 ~= nil)
     assert(v2.x == -1)
     assert(v2.y == -2)
-end
+end)
