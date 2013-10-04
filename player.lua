@@ -1,4 +1,5 @@
 local vector = require "lib/hump/vector"
+local matrix = require "utils/matrix"
 local display = require "display"
 
 local Player = {
@@ -38,11 +39,13 @@ function Player:update(dt)
     if love.keyboard.isDown("x") then zoom = zoom + zoomSpeed end
     if love.keyboard.isDown("c") then zoom = zoom - zoomSpeed end
 
-    self.object.transform.position = self.object.transform.position +
-        vector.new(moveForward*math.sin(-self.object.transform.rotation) -
-                   moveSideways*math.cos(-self.object.transform.rotation),
-                   moveForward*math.cos(-self.object.transform.rotation) +
-                   moveSideways*math.sin(-self.object.transform.rotation))
+    local velocity = matrix.rotate(self.object.transform.rotation) *
+                     vector.new(moveForward, moveSideways)
+    print(self.object.transform.position)
+    print(velocity)
+
+    self.object.transform.position = self.object.transform.position + velocity
+
     self.object.transform.rotation = rotation
     self.object.player.zoom = math.max(0.01, math.min(100, self.object.player.zoom + zoom))
 
