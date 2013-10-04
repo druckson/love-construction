@@ -1,4 +1,4 @@
-local vector = require "../lib/hump/vector"
+local vector = require "lib/hump/vector"
 local math = require "math"
 
 local Matrix = {}
