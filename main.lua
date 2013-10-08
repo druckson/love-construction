@@ -4,14 +4,14 @@ local display = require "display"
 local player = require "player"
 local construction = require "construction"
 
-local worldSize = vector.new(100, 100)
+local worldSize = vector.new(10, 10)
 local screenSize = vector.new(1366, 768)
 
 function createJoinPoint(parent, x, y, r)
     local childBlock = entity.new(parent)
     childBlock.transform:setPosition(x, y)
     childBlock.transform:setRotation(r)
-    display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
+    --display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
     construction:add(childBlock)
 end
 
@@ -35,7 +35,7 @@ end
 
 function test1()
     local parentBlocks = {}
-    for i=0,1000 do
+    for i=0,1 do
         table.insert(parentBlocks, createBlock())
     end
 
