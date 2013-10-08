@@ -1,4 +1,4 @@
-local vector = require "lib/hump/vector"
+local transform = require"../utils/transform" local vector = require "lib/hump/vector"
 
 local Construction = {
     objects = {}
@@ -9,50 +9,18 @@ function Construction:add(object)
     table.insert(self.objects, object)
 end
 
-function getRelativePosition(object)
-    assert(object.transform ~= nil)
-
-    if object.transform.parent == nil then
-        return vector.new(0, 0)
-    else
-        return object.transform.position + getRelativePosition(object.transform.parent)
-    end
-end
-
-function getRelativeRotation(object)
-    assert(object.transform ~= nil)
-
-    if object.transform.parent == nil then
-        return 0
-    else
-        return object.transform.rotation + getRelativeRotation(object.transform.parent)
-    end
-end
-
-function getMaximalAncestor(object)
-    assert(object.transform ~= nil)
-    
-    if object.transform.parent == nil then
-        return object
-    else
-        return getMaximalAncestor(object.transform.parent)
-    end
-end
-
 function Construction:connect(o1, o2)
     assert(o1.construction ~= nil and o2.construction ~= nil,
            "Connect: wrong argument types (construction expected)")
 
-    local o1rel = getRelativePosition(o1)
-    local o2rel = getRelativePosition(o2)
+    local locator = transform.new()
+    locator:setMatrix(o2.transform:getAbsoluteMatrix())
 
-    local o1par = getMaximalAncestor(o1)
-    local o2par = getMaximalAncestor(o2)
-
-    local dist = o1rel:len() + o2rel:len()
-    local direction = o1rel:normalized()
-
-    o2par.transform.position = o1par.transform.position + (direction * dist)
+    local o2BaseAncestor = o2.transform:getBaseAncestor()
+    o2BaseAncestor:setParent(locator)
+    locator:setMatrix(o1.transform:getAbsoluteMatrix())
+    locator:rotate(math.pi)
+    o2BaseAncestor:removeParent()
 end
 
 return Construction
