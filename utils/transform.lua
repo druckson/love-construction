@@ -33,9 +33,8 @@ function Transform:setAbsolute()
 end
 
 function Transform:setRelative(parent)
-    self.rotation = self.rotation - parent.rotation
-    local changeOfBasis = matrix.rotate(-parent.rotation) * matrix.translate(-parent.position.x, -parent.position.y)
-    self.position = changeOfBasis * self.position
+    local changeOfBasis = matrix.rotate(-parent.rotation) * matrix.translate(-parent.position.x, -parent.position.y) 
+    self:setMatrix(changeOfBasis * self:getMatrix())
 end
 
 function Transform:setParent(parent)
@@ -59,11 +58,11 @@ function Transform:setRotation(r)
 end
 
 function Transform:getMatrix()
-    return matrix.translate(self.position.x, self.position.y) * matrix.rotate(-self.rotation)
+    return matrix.translate(self.position.x, self.position.y) * matrix.rotate(self.rotation)
 end
 
 function Transform:setMatrix(matrix)
-    self.rotation = math.acos(matrix[1][2])
+    self.rotation = math.acos(matrix[1][1])
     self.position = vector.new(matrix[3][1], matrix[3][2])
 end
 
