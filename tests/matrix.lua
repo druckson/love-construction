@@ -83,6 +83,16 @@ describe("Matrix tests", function()
         assert.is_true(compare(v2.y, -2))
     end)
 
+    it("Test rotation", function()
+        local m1 = matrix.rotate(math.pi/2)
+        local v1 = vector.new(0, 1)
+        local v2 = m1 * v1
+
+        assert.is_not_nil(v2)
+        assert.is_true(compare(v2.x, 1))
+        assert.is_true(compare(v2.y, 0))
+    end)
+
     it("Test print", function()
         local m1 = matrix.translate(1, 2) * matrix.rotate(1)
         local m2 = matrix.translate(5, 3) * matrix.rotate(3)

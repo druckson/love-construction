@@ -65,7 +65,7 @@ function Matrix:__mul(other)
             {combine(1, 2), combine(2, 2), combine(3, 2)},
             {combine(1, 3), combine(2, 3), combine(3, 3)}
         })
-    elseif (vector.isvector(other)) then
+    else
         return vector.new(self[1][1]*other.x + self[2][1]*other.y + self[3][1],
                           self[1][2]*other.x + self[2][2]*other.y + self[3][2])
     end
