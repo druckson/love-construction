@@ -50,8 +50,8 @@ function Display:displayChildren(object)
         end
     end
 
-    for _, child in pairs(object.children) do
-        self:displayChildren(child)
+    for _, child in pairs(object.transform.children) do
+        self:displayChildren(child.object)
     end
 
     love.graphics.pop()
@@ -88,7 +88,7 @@ function Display:display()
     love.graphics.translate(-self.camera.position.x, -self.camera.position.y)
 
     for _, object in pairs(self.objects) do
-        if object.parent == nil then
+        if object.transform.parent == nil then
             self:displayChildren(object)
         end
     end

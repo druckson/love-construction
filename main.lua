@@ -42,6 +42,26 @@ function createBlock()
     return mainBlock
 end
 
+function test1()
+    local parentBlocks = {}
+    for i=0,1 do
+        table.insert(parentBlocks, createBlock())
+    end
+
+    construction:connect(parentBlocks[1].transform.children[1],
+                         parentBlocks[2].transform.children[1])
+end
+
+function test2()
+    local parentBlocks = {}
+    for i=0,1 do
+        table.insert(parentBlocks, createBlock())
+    end
+
+    construction:connect(parentBlocks[1].transform.children[1],
+                         parentBlocks[2].transform.children[1])
+end
+
 function love.load()   
     display:setScreenSize(screenSize.x, screenSize.y)
 
@@ -49,13 +69,7 @@ function love.load()
     world.transform:setPosition(worldSize.x/2, worldSize.y/2)
     display:add(world, "rect", {200, 200, 200, 255}, {size=worldSize})
 
-    local parentBlocks = {}
-    for i=0,1 do
-        table.insert(parentBlocks, createBlock())
-    end
-
-    construction:connect(parentBlocks[1].children[1],
-                         parentBlocks[2].children[1])
+    test1()
 
     local p1 = entity.new()
     p1.transform:setPosition(1, 1)
