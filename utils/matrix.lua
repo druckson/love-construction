@@ -54,7 +54,7 @@ local function linearCombine(v1, v2)
     return total
 end
 
-function Matrix.__mul(self, other)
+function Matrix:__mul(other)
     if (getmetatable(other) == Matrix) then
         local function combine(x, y)
             return linearCombine(self:getRow(x), other:getColumn(y))
@@ -70,6 +70,19 @@ function Matrix.__mul(self, other)
                           self[1][2]*other.x + self[2][2]*other.y + self[3][2])
     end
     assert(false, "Expected matrix or vector in multiplication")
+end
+
+function Matrix:__tostring()
+    local string = ''
+    for _, row in pairs(self) do
+        local line = ''
+        for _, element in pairs(row) do
+            line = line .. ' ' .. element
+        end
+        string = string .. '{' .. line .. '}' .. '\n'
+    end
+
+    return string
 end
 
 return setmetatable(Matrix, {__call = Matrix.new})
