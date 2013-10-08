@@ -4,8 +4,16 @@ local display = require "display"
 local player = require "player"
 local construction = require "construction"
 
-local worldSize = vector.new(10, 10)
+local worldSize = vector.new(100, 100)
 local screenSize = vector.new(1366, 768)
+
+function createJoinPoint(parent, x, y, r)
+    local childBlock = entity.new(parent)
+    childBlock.transform:setPosition(x, y)
+    childBlock.transform:setRotation(r)
+    display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
+    construction:add(childBlock)
+end
 
 function createBlock()
     local mainBlock = entity.new()
@@ -17,34 +25,17 @@ function createBlock()
     
     display:add(mainBlock, "square", {90, 90, 90, 255}, {size=1})
     
-    local childBlock = entity.new(mainBlock)
-    childBlock.transform:setPosition(0.5, 0)
-    display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
-    construction:add(childBlock)
+    createJoinPoint(mainBlock, 0.5,  0, 0)
+    createJoinPoint(mainBlock, 0,  0.5, math.pi/2)
+    createJoinPoint(mainBlock, -0.5, 0, math.pi)
+    createJoinPoint(mainBlock, 0, -0.5, 3*math.pi/2)
 
-    childBlock = entity.new(mainBlock)
-    childBlock.transform:setPosition(0, 0.5)
-    childBlock.transform:setRotation(math.pi/2)
-    display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
-    construction:add(childBlock)
-    
-    childBlock = entity.new(mainBlock)
-    childBlock.transform:setPosition(-0.5, 0)
-    childBlock.transform:setRotation(math.pi)
-    display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
-    construction:add(childBlock)
-    
-    childBlock = entity.new(mainBlock)
-    childBlock.transform:setPosition(0, -0.5)
-    childBlock.transform:setRotation(3*math.pi/2)
-    display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
-    construction:add(childBlock)
     return mainBlock
 end
 
 function test1()
     local parentBlocks = {}
-    for i=0,1 do
+    for i=0,1000 do
         table.insert(parentBlocks, createBlock())
     end
 
