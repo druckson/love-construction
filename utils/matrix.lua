@@ -85,4 +85,4 @@ function Matrix:__tostring()
     return string
 end
 
-return setmetatable(Matrix, {__call = Matrix.new})
+return Matrix

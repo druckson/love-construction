@@ -78,4 +78,4 @@ function Transform:__tostring()
     return 'translate: ' .. self.position:__tostring() .. ' rotate: pi*' .. self.rotation / math.pi
 end
 
-return setmetatable(Transform, {__call = Transform.new})
+return Transform
