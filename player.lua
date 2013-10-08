@@ -41,8 +41,6 @@ function Player:update(dt)
 
     local velocity = matrix.rotate(-self.object.transform.rotation) *
                      vector.new(-moveSideways, moveForward)
-    print(self.object.transform.position)
-    print(velocity)
 
     self.object.transform.position = self.object.transform.position + velocity
 

@@ -7,26 +7,16 @@ local Entity = {
 Entity.__index = Entity
 
 function Entity.new(parent)
+    local parentTransform = nil
+
+    if (parent ~= nil) then
+        parentTransform = parent.transform
+    end
+
     local newEntity = {
-        transform = transform(),
-        children = {},
-        parent = nil
+        transform = transform(self, parentTransform)
     }
-
-    if parent ~= nil then
-        assert(getmetatable(parent) == Entity)
-        parent:addChild(newEntity)
-    end
-
     return setmetatable(newEntity, Entity)
-end
-
-function Entity:addChild(child)
-    if child.parent ~= nil then
-        table.remove(child.parent.children, child)
-    end
-    child.parent = self
-    table.insert(self.children, child)
 end
 
 return setmetatable({new = Entity.new}, {Entity.new})
