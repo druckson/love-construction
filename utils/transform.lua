@@ -25,7 +25,11 @@ function Transform:addChild(child)
 end
 
 function Transform:removeChild(child)
-    table.remove(self.children, child)
+    for key, value in pairs(self.children) do
+        if value == child then
+            table.remove(self.children, key)
+        end
+    end
 end
 
 function Transform:setAbsolute()
@@ -37,16 +41,38 @@ function Transform:setRelative(parent)
     self:setMatrix(changeOfBasis * self:getMatrix())
 end
 
-function Transform:setParent(parent)
-    self:setAbsolute()
-
+function Transform:getBaseAncestor()
     if self.parent ~= nil then
-        self.parent:removeChild(self)
-        self:setRelative(parent)
+        return self.parent:getBaseAncestor()
+    else
+        return self
     end
+end
+
+function Transform:removeParent()
+    if self.parent ~= nil then
+        self:setAbsolute()
+        self.parent:removeChild(self)
+        self.parent = nil
+    end
+end
+
+function Transform:setParent(parent)
+    self:removeParent()
+
+    self:setRelative(parent)
 
     self.parent = parent
     self.parent:addChild(self)
+end
+
+function Transform:rotate(r)
+    self.rotation = self.rotation + r
+end
+
+function Transform:move(x, y)
+    self.position.x = self.position.x + x
+    self.position.y = self.position.x + y
 end
 
 function Transform:setPosition(x, y)
@@ -75,7 +101,11 @@ function Transform:getAbsoluteMatrix()
 end
 
 function Transform:__tostring()
-    return 'translate: ' .. self.position:__tostring() .. ' rotate: pi*' .. self.rotation / math.pi
+    local output = ''
+    if self.parent ~= nil then
+        output = 'Has Parent '
+    end
+    return output .. 'translate: ' .. self.position:__tostring() .. ' rotate: pi*' .. self.rotation / math.pi
 end
 
 return Transform
