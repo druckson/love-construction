@@ -19,7 +19,7 @@ function Entity.new(parent)
 end
 
 function Entity:__tostring()
-    return self.transform:__tostring()
+    return "Entity: " .. self.transform:__tostring()
 end
 
 return setmetatable({new = Entity.new}, {Entity.new})
