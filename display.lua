@@ -22,7 +22,7 @@ end
 function Display:displayChildren(object)
     love.graphics.push()
     love.graphics.translate(object.transform.position.x, object.transform.position.y)
-    love.graphics.rotate(object.transform.rotation)
+    love.graphics.rotate(-object.transform.rotation)
 
     if object.display ~= nil then
         love.graphics.setColor(object.display.color)
