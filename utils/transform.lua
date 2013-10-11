@@ -56,6 +56,10 @@ function Transform:removeParent()
 end
 
 function Transform:setParent(parent)
+    if self.parent ~= nil then
+        self:removeParent()
+    end
+
     self:setRelative(parent)
 
     self.parent = parent
@@ -87,7 +91,7 @@ end
 function Transform:setMatrix(matrix)
     self.position = matrix * vector.new(0, 0)
     local newPosition = (matrix * vector.new(0, 1)) - self.position
-    self:setRotation(math.atan(newPosition.x / newPosition.y))
+    self:setRotation(-math.atan(newPosition.x / newPosition.y))
 end
 
 function Transform:getAbsoluteMatrix()

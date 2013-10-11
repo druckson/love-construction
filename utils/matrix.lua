@@ -24,9 +24,9 @@ end
 
 function Matrix.rotate(r)
     return Matrix.new({
-        {math.cos(r), -math.sin(r), 0},
-        {math.sin(r),  math.cos(r), 0},
-        {          0,            0, 1}
+        { math.cos(r), math.sin(r), 0},
+        {-math.sin(r), math.cos(r), 0},
+        {           0,           0, 1}
     })
 end
 
