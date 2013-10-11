@@ -19,6 +19,14 @@ function Display:add(object, shape, color, properties)
     table.insert(self.objects, object)
 end
 
+function Display:remove(object)
+    for key, value in pairs(self.objects) do
+        if value == object then
+            table.remove(self.objects, key)
+        end
+    end
+end
+
 function Display:displayChildren(object)
     love.graphics.push()
     love.graphics.translate(object.transform.position.x, object.transform.position.y)
