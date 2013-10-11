@@ -92,6 +92,7 @@ function Transform:setMatrix(matrix)
     self.position = matrix * vector.new(0, 0)
     local newPosition = (matrix * vector.new(0, 1)) - self.position
     self:setRotation(-math.atan(newPosition.x / newPosition.y))
+    if newPosition.y < 0 then self:rotate(math.pi) end
 end
 
 function Transform:getAbsoluteMatrix()
