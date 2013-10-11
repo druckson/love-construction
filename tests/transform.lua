@@ -15,7 +15,7 @@ describe("Transform tests", function()
             parent:setRotation(math.pi/2)
             child:setPosition(0, 1)
             child:setRotation(0)
-            child:setAbsolute()
+            child:removeParent()
 
             assert(compare(child.position.x, 1))
             assert(compare(child.position.y, 1))
@@ -67,25 +67,12 @@ describe("Transform tests", function()
 
             child:setRelative(parent)
 
-            assert(compare(child.position.x, 0))
-            assert(compare(child.position.y, 1))
-            assert(compare(child.rotation, math.pi/2))
-        end)
-
-        it("Complex example", function()
-            local parent = transform.new(nil)
-            local child = transform.new(nil)
-            parent:setPosition(0, 1)
-            parent:setRotation(math.pi/2)
-
-            child:setPosition(1, 1)
-            child:setRotation(0)
-
-            child:setParent(parent)
+            print(child.position)
+            print(child.rotation)
 
             assert(compare(child.position.x, 0))
             assert(compare(child.position.y, 1))
-            assert(compare(child.rotation, math.pi/2))
+            assert(compare(child.rotation, 3*math.pi/2))
         end)
     end)
 end)
