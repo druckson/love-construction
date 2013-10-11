@@ -20,7 +20,7 @@ function Construction:connect(o1, o2)
     locator.transform:setMatrix(o2.transform:getAbsoluteMatrix())
     o2BaseAncestor:setParent(locator.transform)
     locator.transform:setMatrix(o1.transform:getAbsoluteMatrix())
-    --locator.transform:rotate(math.pi)
+    locator.transform:rotate(math.pi)
     o2BaseAncestor:removeParent()
 
     return locator
