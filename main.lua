@@ -4,8 +4,9 @@ local entity = require "entity"
 local display = require "display"
 local player = require "player"
 local construction = require "construction"
+local physics = require "physics"
 
-local worldSize = vector.new(5, 5)
+local worldSize = vector.new(10, 10)
 local screenSize = vector.new(1366, 768)
 
 function createJoinPoint(parent, color, x, y, r)
@@ -16,7 +17,7 @@ function createJoinPoint(parent, color, x, y, r)
     construction:add(childBlock)
 end
 
-function createBlock(color)
+function createBlock(color, isPlayer)
     local mainBlock = entity.new()
     mainBlock.transform:setPosition(
         math.random() * worldSize.x,
@@ -26,11 +27,17 @@ function createBlock(color)
         math.random()*2*math.pi)
     
     display:add(mainBlock, "square", color, {size=1})
-    
-    createJoinPoint(mainBlock, {60, 00, 00, 255}, 0.5,  0, 0)
-    createJoinPoint(mainBlock, {60, 60, 60, 255}, 0,  0.5, math.pi/2)
-    createJoinPoint(mainBlock, {60, 60, 60, 255}, -0.5, 0, math.pi)
-    createJoinPoint(mainBlock, {60, 60, 60, 255}, 0, -0.5, -math.pi/2)
+    physics:add(mainBlock, love.physics.newRectangleShape(0.5, 0.5), "dynamic")
+
+
+    if isPlayer then
+        player:set(mainBlock, 1)
+    else
+        createJoinPoint(mainBlock, {60, 00, 00, 255}, 0.5,  0, 0)
+        createJoinPoint(mainBlock, {60, 60, 60, 255}, 0,  0.5, math.pi/2)
+        createJoinPoint(mainBlock, {60, 60, 60, 255}, -0.5, 0, math.pi)
+        createJoinPoint(mainBlock, {60, 60, 60, 255}, 0, -0.5, -math.pi/2)
+    end
 
     return mainBlock
 end
@@ -51,17 +58,29 @@ function test1()
     --for i=0,1 do
     --    table.insert(parentBlocks, createBlock({90, 90, 90, 255}))
     --end
+    --
+    local wx = worldSize.x
+    local wy = worldSize.y
+
+    physics:add(entity.new(), love.physics.newEdgeShape( 0,  0, wx,  0), "static")
+    physics:add(entity.new(), love.physics.newEdgeShape(wx,  0, wx, wy), "static")
+    physics:add(entity.new(), love.physics.newEdgeShape(wx, wy,  0, wy), "static")
+    physics:add(entity.new(), love.physics.newEdgeShape( 0, wy,  0,  0), "static")
     
     local gr = iterateGR(0)
-    table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.5, 0.5, 0.5)))
-    table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.5, 0.5, 0.5)))
-    table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.5, 0.5, 0.5)))
-    table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.5, 0.5, 0.5)))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
 
-    locator = construction:connect(parentBlocks[1].transform.children[1].object,
-                                   parentBlocks[2].transform.children[1].object)
-    locator = construction:connect(parentBlocks[1].transform.children[2].object,
-                                   parentBlocks[3].transform.children[1].object)
+    for i = 0, 50 do
+        table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+    end
+
+    --locator = construction:connect(parentBlocks[1].transform.children[1].object,
+    --                               parentBlocks[2].transform.children[1].object)
+    --locator = construction:connect(parentBlocks[1].transform.children[2].object,
+    --                               parentBlocks[3].transform.children[1].object)
 end
 
 function test2()
@@ -82,10 +101,7 @@ function love.load()
 
     test1()
 
-    local p1 = entity.new()
-    p1.transform:setPosition(1, 1)
-    display:add(p1, "square", {30, 90, 30, 255}, {size=1})
-    player:set(p1, 1)
+    local p1 = createBlock(color.HsvToRgb(0, 0.7, 0.7, 1.0), true)
 end
 
 function love.keypressed(k)
@@ -99,6 +115,7 @@ end
 
 function love.update(dt)
     player:update(dt)
+    physics:update(dt)
 end
 
 function love.draw()
