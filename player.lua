@@ -44,12 +44,12 @@ function Player:update(dt)
 
     self.object.transform.position = self.object.transform.position + velocity
 
-    self.object.transform.rotation = -rotation
+    self.object.transform.rotation = rotation
     self.object.player.zoom = math.max(0.01, math.min(100, self.object.player.zoom + zoom))
 
     display:moveCamera(self.object.transform.position.x,
                        self.object.transform.position.y)
-    display:rotateCamera(-self.object.transform.rotation)
+    display:rotateCamera(self.object.transform.rotation)
     display:zoomCamera(self.object.player.zoom)
 end
 
