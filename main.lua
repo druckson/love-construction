@@ -1,3 +1,4 @@
+local color = require "utils/color"
 local vector = require "lib/hump/vector"
 local entity = require "entity"
 local display = require "display"
@@ -11,7 +12,7 @@ function createJoinPoint(parent, color, x, y, r)
     local childBlock = entity.new(parent)
     childBlock.transform:setPosition(x, y)
     childBlock.transform:setRotation(r)
-    display:add(childBlock, "triangle", color, {radius=0.1})
+    --display:add(childBlock, "triangle", color, {radius=0.1})
     construction:add(childBlock)
 end
 
@@ -37,14 +38,25 @@ end
 local locator
 local parentBlocks = {}
 
+function iterateGR(start)
+    local current = start
+    return function()
+        current = (current + 1.61803398875) % 1
+        return current
+    end
+end
+
 function test1()
     parentBlocks = {}
     --for i=0,1 do
     --    table.insert(parentBlocks, createBlock({90, 90, 90, 255}))
     --end
-    table.insert(parentBlocks, createBlock({90, 0,  0, 128}))
-    table.insert(parentBlocks, createBlock({0, 90,  0, 128}))
-    table.insert(parentBlocks, createBlock({0,  0, 90, 128}))
+    
+    local gr = iterateGR(0)
+    table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.5, 0.5, 0.5)))
+    table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.5, 0.5, 0.5)))
+    table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.5, 0.5, 0.5)))
+    table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.5, 0.5, 0.5)))
 
     locator = construction:connect(parentBlocks[1].transform.children[1].object,
                                    parentBlocks[2].transform.children[1].object)
