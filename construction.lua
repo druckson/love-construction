@@ -10,6 +10,14 @@ function Construction:add(object)
     table.insert(self.objects, object)
 end
 
+function Construction:remove(object)
+    for key, value in self.objects do
+        if value == object then
+            table.remove(self.objects, key)
+        end
+    end
+end
+
 function Construction:connect(o1, o2)
     assert(o1.construction ~= nil and o2.construction ~= nil,
            "Connect: wrong argument types (construction expected)")
