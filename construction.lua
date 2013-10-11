@@ -24,11 +24,18 @@ function Construction:connect(o1, o2)
 
     local locator = entity.new()
 
+    -- Transform the first object in relation to the join point
     local o2BaseAncestor = o2.transform:getBaseAncestor()
     locator.transform:setMatrix(o2.transform:getAbsoluteMatrix())
     o2BaseAncestor:setParent(locator.transform)
+
+    -- Move the join point (locator) to the second object
     locator.transform:setMatrix(o1.transform:getAbsoluteMatrix())
+
+    -- Line it up
     locator.transform:rotate(math.pi)
+
+    -- Remove the temporary locator
     o2BaseAncestor:removeParent()
 
     return locator
