@@ -4,43 +4,52 @@ local display = require "display"
 local player = require "player"
 local construction = require "construction"
 
-local worldSize = vector.new(10, 10)
+local worldSize = vector.new(5, 5)
 local screenSize = vector.new(1366, 768)
 
-function createJoinPoint(parent, x, y, r)
+function createJoinPoint(parent, color, x, y, r)
     local childBlock = entity.new(parent)
     childBlock.transform:setPosition(x, y)
     childBlock.transform:setRotation(r)
-    --display:add(childBlock, "triangle", {60, 60, 60, 255}, {radius=0.1})
+    display:add(childBlock, "triangle", color, {radius=0.1})
     construction:add(childBlock)
 end
 
-function createBlock()
+function createBlock(color)
     local mainBlock = entity.new()
     mainBlock.transform:setPosition(
-        math.random(worldSize.x),
-        math.random(worldSize.y))
+        math.random() * worldSize.x,
+        math.random() * worldSize.y)
+
     mainBlock.transform:setRotation(
-        math.random(math.pi))
+        math.random()*2*math.pi)
     
-    display:add(mainBlock, "square", {90, 90, 90, 255}, {size=1})
+    display:add(mainBlock, "square", color, {size=1})
     
-    createJoinPoint(mainBlock, 0.5,  0, 0)
-    createJoinPoint(mainBlock, 0,  0.5, math.pi/2)
-    createJoinPoint(mainBlock, -0.5, 0, math.pi)
-    createJoinPoint(mainBlock, 0, -0.5, 3*math.pi/2)
+    createJoinPoint(mainBlock, {60, 00, 00, 255}, 0.5,  0, 0)
+    createJoinPoint(mainBlock, {60, 60, 60, 255}, 0,  0.5, math.pi/2)
+    createJoinPoint(mainBlock, {60, 60, 60, 255}, -0.5, 0, math.pi)
+    createJoinPoint(mainBlock, {60, 60, 60, 255}, 0, -0.5, -math.pi/2)
 
     return mainBlock
 end
 
-function test1()
-    local parentBlocks = {}
-    for i=0,1 do
-        table.insert(parentBlocks, createBlock())
-    end
+local locator
+local parentBlocks = {}
 
-    construction:connect(parentBlocks[1].transform.children[1],
-                         parentBlocks[2].transform.children[1])
+function test1()
+    parentBlocks = {}
+    --for i=0,1 do
+    --    table.insert(parentBlocks, createBlock({90, 90, 90, 255}))
+    --end
+    table.insert(parentBlocks, createBlock({90, 0,  0, 128}))
+    table.insert(parentBlocks, createBlock({0, 90,  0, 128}))
+    table.insert(parentBlocks, createBlock({0,  0, 90, 128}))
+
+    locator = construction:connect(parentBlocks[1].transform.children[1].object,
+                                   parentBlocks[2].transform.children[1].object)
+    locator = construction:connect(parentBlocks[1].transform.children[2].object,
+                                   parentBlocks[3].transform.children[1].object)
 end
 
 function test2()
@@ -49,8 +58,7 @@ function test2()
         table.insert(parentBlocks, createBlock())
     end
 
-    construction:connect(parentBlocks[1].transform.children[1],
-                         parentBlocks[2].transform.children[1])
+    
 end
 
 function love.load()   
@@ -72,6 +80,9 @@ function love.keypressed(k)
     if k == 'escape' then
         love.event.push('quit') -- Quit the game.
     end 
+    if k == 'e' then
+        parentBlocks[2].transform:removeParent()
+    end
 end
 
 function love.update(dt)
