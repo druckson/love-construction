@@ -37,8 +37,8 @@ function Transform:setAbsolute()
 end
 
 function Transform:setRelative(parent)
-    local changeOfBasis = matrix.rotate(-parent.rotation) * matrix.translate(-parent.position.x, -parent.position.y) 
-    self:setMatrix(changeOfBasis * self:getMatrix())
+    local changeOfBasis = matrix.rotate(-parent.rotation) * matrix.translate(-parent.position.x, -parent.position.y)
+    self:setMatrix(changeOfBasis * self:getAbsoluteMatrix())
 end
 
 function Transform:getBaseAncestor()
@@ -50,16 +50,12 @@ function Transform:getBaseAncestor()
 end
 
 function Transform:removeParent()
-    if self.parent ~= nil then
-        self:setAbsolute()
-        self.parent:removeChild(self)
-        self.parent = nil
-    end
+    self:setAbsolute()
+    self.parent:removeChild(self)
+    self.parent = nil
 end
 
 function Transform:setParent(parent)
-    self:removeParent()
-
     self:setRelative(parent)
 
     self.parent = parent
@@ -67,7 +63,7 @@ function Transform:setParent(parent)
 end
 
 function Transform:rotate(r)
-    self.rotation = self.rotation + r
+    self:setRotation(self.rotation + r)
 end
 
 function Transform:move(x, y)
@@ -80,6 +76,7 @@ function Transform:setPosition(x, y)
 end
 
 function Transform:setRotation(r)
+    local r = ((2 * math.pi) + r) % (2 * math.pi)
     self.rotation = r
 end
 
@@ -88,8 +85,9 @@ function Transform:getMatrix()
 end
 
 function Transform:setMatrix(matrix)
-    self.rotation = math.acos(matrix[1][1])
-    self.position = vector.new(matrix[3][1], matrix[3][2])
+    self.position = matrix * vector.new(0, 0)
+    local newPosition = (matrix * vector.new(0, 1)) - self.position
+    self:setRotation(math.atan(newPosition.x / newPosition.y))
 end
 
 function Transform:getAbsoluteMatrix()
