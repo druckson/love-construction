@@ -5,8 +5,9 @@ local vector = require "lib/hump/vector"
 local entity = require "entity"
 local systems = require "systems"
 
+local mode = love.graphics.getModes()[1]
 local worldSize = vector.new(1000, 1000)
-local screenSize = vector.new(1366, 768)
+local screenSize = vector.new(mode.width, mode.height)
 
 local physics = systems.Physics()
 local display = systems.Display()
