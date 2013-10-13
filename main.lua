@@ -1,13 +1,17 @@
 local color = require "utils/color"
+local class = require "lib/hump/class"
+local matrix = require "utils/matrix"
 local vector = require "lib/hump/vector"
 local entity = require "entity"
-local display = require "display"
-local player = require "player"
-local construction = require "construction"
-local physics = require "physics"
+local systems = require "systems"
 
-local worldSize = vector.new(10, 10)
+local worldSize = vector.new(1000, 1000)
 local screenSize = vector.new(1366, 768)
+
+local physics = systems.Physics()
+local display = systems.Display()
+local player = systems.Player(display)
+local construction = systems.Construction()
 
 function createJoinPoint(parent, color, x, y, r)
     local childBlock = entity.new(parent)
@@ -17,11 +21,9 @@ function createJoinPoint(parent, color, x, y, r)
     construction:add(childBlock)
 end
 
-function createBlock(color, isPlayer)
+function createBlock(color, position, isPlayer)
     local mainBlock = entity.new()
-    mainBlock.transform:setPosition(
-        math.random() * worldSize.x,
-        math.random() * worldSize.y)
+    mainBlock.transform:setPosition(position:unpack())
 
     mainBlock.transform:setRotation(
         math.random()*2*math.pi)
@@ -42,8 +44,22 @@ function createBlock(color, isPlayer)
     return mainBlock
 end
 
-local locator
-local parentBlocks = {}
+function createGlobe(center, color, radius)
+    local globe = entity.new()
+    globe.transform:setPosition(center:unpack())
+    display:add(globe, "circle", color, {radius=radius})
+    physics:addGravity(center.x, center.y, 0.000001*radius*radius)
+    
+    local segments = 100
+    local translate = matrix.translate(worldSize.x / 2, worldSize.y / 2)
+    for i = 0, segments do
+        local p1 = center + radialToCartesian(radius, 2*math.pi*i / segments)
+        local p2 = center + radialToCartesian(radius, 2*math.pi*(i + 1) / segments)
+        physics:add(entity.new(), love.physics.newEdgeShape(p1.x, p1.y, p2.x, p2.y), "static")
+    end
+
+    return globe
+end
 
 function iterateGR(start)
     local current = start
@@ -51,6 +67,10 @@ function iterateGR(start)
         current = (current + 1.61803398875) % 1
         return current
     end
+end
+
+function radialToCartesian(radius, angle)
+    return matrix.rotate(angle) * vector.new(0, radius)
 end
 
 function test1()
@@ -62,19 +82,24 @@ function test1()
     local wx = worldSize.x
     local wy = worldSize.y
 
-    physics:add(entity.new(), love.physics.newEdgeShape( 0,  0, wx,  0), "static")
-    physics:add(entity.new(), love.physics.newEdgeShape(wx,  0, wx, wy), "static")
-    physics:add(entity.new(), love.physics.newEdgeShape(wx, wy,  0, wy), "static")
-    physics:add(entity.new(), love.physics.newEdgeShape( 0, wy,  0,  0), "static")
+    local center = worldSize * 0.5
+    local radius = math.min(worldSize.x, worldSize.y) * 0.3
+    createGlobe(center, {60, 60, 60, 255}, radius)
+
+    --physics:add(entity.new(), love.physics.newEdgeShape( 0,  0, wx,  0), "static")
+    --physics:add(entity.new(), love.physics.newEdgeShape(wx,  0, wx, wy), "static")
+    --physics:add(entity.new(), love.physics.newEdgeShape(wx, wy,  0, wy), "static")
+    --physics:add(entity.new(), love.physics.newEdgeShape( 0, wy,  0,  0), "static")
+
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
     
     local gr = iterateGR(0)
-    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
-    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
-    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
-    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
 
     for i = 0, 50 do
-        table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+        table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), center + radialToCartesian(radius*1.1, 2*math.pi*gr()), false))
     end
 
     --locator = construction:connect(parentBlocks[1].transform.children[1].object,
@@ -101,21 +126,18 @@ function love.load()
 
     test1()
 
-    local p1 = createBlock(color.HsvToRgb(0, 0.7, 0.7, 1.0), true)
+    local p1 = createBlock(color.HsvToRgb(0, 0.7, 0.7, 1.0), radialToCartesian(100, 0), true)
 end
 
 function love.keypressed(k)
     if k == 'escape' then
         love.event.push('quit') -- Quit the game.
     end 
-    if k == 'e' then
-        parentBlocks[2].transform:removeParent()
-    end
 end
 
 function love.update(dt)
-    player:update(dt)
     physics:update(dt)
+    player:update(dt)
 end
 
 function love.draw()

@@ -1,13 +1,17 @@
 local vector = require "lib/hump/vector"
+local Class = require "lib/hump/class"
 
-local Display = {
-    screenSize = vector.new(300, 300),
-    camera = {
-        position = vector.new(0, 0),
-        rotation = 0,
-        zoom = 1
-    },
-    objects = {}
+local Display = Class{
+    init = function(self)
+        self.screenSize = vector.new(300, 300)
+        self.camera = {
+            position = vector.new(0, 0),
+            rotation = 0,
+            zoom = 1
+        }
+        self.objects = {}
+        self.speedometer = ""
+    end
 }
 
 function Display:add(object, shape, color, properties)
@@ -45,7 +49,7 @@ function Display:displayChildren(object)
                                     properties.size, 
                                     properties.size)
         elseif object.display.shape == "circle" then
-            love.graphics.circle("fill", -properties.radius/2, -properties.radius/2, properties.radius)
+            love.graphics.circle("fill", 0, 0, properties.radius)
         elseif object.display.shape == "triangle" then
             local points = {}
             love.graphics.polygon("fill", {
@@ -63,6 +67,10 @@ function Display:displayChildren(object)
     end
 
     love.graphics.pop()
+end
+
+function Display:setSpeedometer(message)
+    self.speedometer = message
 end
 
 function Display:setScreenSize(x, y)
@@ -103,6 +111,7 @@ function Display:display()
     love.graphics.pop()
 
     love.graphics.print("FPS: "..love.timer.getFPS(), 10, 10)
+    love.graphics.print("Speed: "..self.speedometer, 10, 20)
 end
 
 return Display

@@ -1,20 +1,24 @@
 local vector = require "lib/hump/vector"
 local matrix = require "utils/matrix"
-local display = require "display"
+local Class = require "lib/hump/class"
 
-local Player = {
-    object = {}
+local Player = Class{
+    init = function(self, display)
+        self.display = display
+        self.object = {}
+    end,
 }
 
 function Player:set(object, zoom)
     object.player = {
-        zoom = zoom or 1
+        zoom = zoom or 1,
+        cameraAngle = object.transform.rotation
     }
     self.object = object
 end
 
 function Player:update(dt)
-    local moveSpeed = dt*10
+    local moveSpeed = 0.001
     local moveForward = 0
     local moveSideways = 0
 
@@ -34,23 +38,28 @@ function Player:update(dt)
             love.mouse.getY())
     end
 
+    local velocity = vector.new(self.object.physics.body:getLinearVelocity()):normalized()
+    self.object.player.cameraAngle = math.pi + velocity:angleTo()
+    --self.object.player.cameraAngle = rotation
+
     local zoomSpeed = dt*10
     local zoom = 0
     if love.keyboard.isDown("x") then zoom = zoom + zoomSpeed end
     if love.keyboard.isDown("c") then zoom = zoom - zoomSpeed end
 
-    local velocity = matrix.rotate(self.object.transform.rotation) *
+    local velocity = matrix.rotate(self.object.player.cameraAngle) *
                      vector.new(-moveSideways, moveForward)
 
-    self.object.transform.position = self.object.transform.position + velocity
-
-    self.object.transform.rotation = rotation
+    self.object.physics.body:applyForce(velocity:unpack())
+    --self.object.physics.body:applyTorque(self.object.player.cameraAngle - rotation)
     self.object.player.zoom = math.max(0.01, math.min(100, self.object.player.zoom + zoom))
 
-    display:moveCamera(self.object.transform.position.x,
-                       self.object.transform.position.y)
-    display:rotateCamera(self.object.transform.rotation)
-    display:zoomCamera(self.object.player.zoom)
+    self.display:moveCamera(self.object.transform.position.x,
+                            self.object.transform.position.y)
+
+    self.display:rotateCamera(self.object.player.cameraAngle)
+    self.display:zoomCamera(self.object.player.zoom)
+    self.display:setSpeedometer(vector.new(self.object.physics.body:getLinearVelocity()):len())
 end
 
 return Player

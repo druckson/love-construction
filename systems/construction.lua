@@ -1,8 +1,12 @@
-local transform = require"../utils/transform" local vector = require "lib/hump/vector"
+local transform = require "../utils/transform"
+local vector = require "lib/hump/vector"
 local entity = require "entity"
+local Class = require "lib/hump/class"
 
-local Construction = {
-    objects = {}
+local Construction = Class{
+    init = function(self)
+        self.objects = {}
+    end
 }
 
 function Construction:add(object)
