@@ -92,7 +92,7 @@ function Display:zoomCamera(z)
 end
 
 function Display:display()
-    love.graphics.setBackgroundColor(255, 255, 255, 255)
+    love.graphics.setBackgroundColor(0, 0, 0, 255)
     love.graphics.clear()
 
     local zoom = 100 / self.camera.zoom
