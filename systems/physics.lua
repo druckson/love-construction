@@ -9,10 +9,11 @@ local Physics = Class{
         self.integrator = integrator
         self.world = love.physics.newWorld(0, 0, true)
         self.objects = {}
+        self.gravityObjects = {}
     end
 }
 
-function Physics:add(object, shape, bodyType)
+function Physics:add(object, shape, bodyType, mass)
     local body = love.physics.newBody(self.world, 
                                       object.transform.position.x, 
                                       object.transform.position.y,
@@ -21,7 +22,8 @@ function Physics:add(object, shape, bodyType)
     local fixture = love.physics.newFixture(body, shape, 1)
     object.physics = {
         body = body,
-        fixture = fixture
+        fixture = fixture,
+        mass = mass
     }
 
     table.insert(self.objects, object)
@@ -31,11 +33,15 @@ function Physics:addCustomConstraint(constraint)
 
 end
 
-function Physics:addGravity(x, y, radius, atmosphereRadius, mass) 
-    self.radius = radius
-    self.atmosphereRadius = atmosphereRadius
-    self.mass = mass
-    self.center = vector.new(x, y)
+function Physics:addGravityObject(object, radius, atmosphereRadius, atmosphereDensity) 
+    table.insert(self.gravityObjects, {
+        object = object,
+        radius = radius,
+        atmosphere = {
+            radius = atmosphereRadius,
+            density = atmosphereDensity
+        }
+    })
 end
 
 function Physics:remove(object)
@@ -50,22 +56,31 @@ function Physics:update(dt)
     local physics = self
     for _, object in pairs(self.objects) do
         if object.transform.parent == nil then
-            if self.center and self.mass then
+            if #physics.gravityObjects > 0 then
                 local position = object.transform.position
                 local velocity = vector.new(object.physics.body:getLinearVelocity())
                 local state = vector.new(position, velocity)
                 _, state = self.integrator(0, dt, state, function(_, state)
                     local position = state.x
                     local velocity = state.y
-                    local gravityVector = (physics.center - position)
-                    local gravityDist2 = gravityVector:len2()
-                    local acceleration = gravityVector * (physics.mass / gravityDist2)
+                    local acceleration = vector.new(0, 0)
 
-                    local radius2 = physics.radius * physics.radius
-                    local atmosphereRadius2 = physics.atmosphereRadius * physics.atmosphereRadius
+                    for _, gravityObject in pairs(physics.gravityObjects) do
+                        if object ~= gravityObject.object then
+                            local gravityVector = 
+                                (gravityObject.object.transform.position - position)
+                            local gravityDist2 = gravityVector:len2()
+                            acceleration = acceleration + (gravityVector * (gravityObject.object.physics.mass / gravityDist2))
 
-                    if gravityDist2 < atmosphereRadius2 then
-                        acceleration = acceleration - (velocity * invlerp(atmosphereRadius2, radius2, gravityDist2) * 0.2)
+                            local radius = gravityObject.radius
+                            local radius2 = radius * radius
+                            local atmosphereRadius = gravityObject.atmosphere.radius
+                            local atmosphereRadius2 = atmosphereRadius * atmosphereRadius
+
+                            if gravityDist2 < atmosphereRadius2 then
+                                acceleration = acceleration - (velocity * invlerp(atmosphereRadius2, radius2, gravityDist2) * 0.2)
+                            end
+                        end
                     end
 
                     return vector.new(velocity, acceleration)
