@@ -25,7 +25,7 @@ local Scene = Class{
         local gr = iterateGR(0)
 
         self.globe = self:createGlobe(vector.new(0, 0), color.HsvToRgb(0.5, 0.7, 0.7, 1.0),
-            100, 1000)
+            100, 30, 500)
 
         self.player1 = self:createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 
             vector.new(400, 0), true, vector.new(0, -30))
@@ -70,11 +70,11 @@ function Scene:createBlock(color, position, isPlayer, velocity)
     return mainBlock
 end
 
-function Scene:createGlobe(center, color, radius, mass)
+function Scene:createGlobe(center, color, radius, atmosphere, mass)
     local globe = entity.new()
     globe.transform:setPosition(center:unpack())
     self.display:add(globe, "circle", color, {radius=radius})
-    self.physics:addGravity(center.x, center.y, radius, mass)
+    self.physics:addGravity(center.x, center.y, radius, radius+atmosphere, mass)
     
     local segments = 100
     local translate = matrix.translate(center:unpack())
