@@ -25,7 +25,12 @@ function Physics:add(object, shape, bodyType)
     table.insert(self.objects, object)
 end
 
-function Physics:addGravity(x, y, mass) 
+function Physics:addCustomConstraint(constraint)
+
+end
+
+function Physics:addGravity(x, y, radius, mass) 
+    self.radius = radius
     self.mass = mass
     self.center = vector.new(x, y)
 end
@@ -48,9 +53,18 @@ function Physics:update(dt)
                 local state = vector.new(position, velocity)
                 _, state = self.integrator(0, dt, state, function(_, state)
                     local position = state.x
+                    local velocity = state.y
                     local gravityVector = (physics.center - position)
-                    gravityVector = gravityVector * (physics.mass / gravityVector:len2())
-                    return vector.new(state.y, gravityVector)
+                    local gravityDist = gravityVector:len2()
+                    local acceleration = gravityVector * (physics.mass / gravityDist)
+
+                    local radius = physics.radius + 30
+                    
+                    if gravityDist < radius * radius then
+                        acceleration = acceleration - (velocity * 0.03)
+                    end
+
+                    return vector.new(velocity, acceleration)
                 end)
                 object.physics.body:setLinearVelocity(state.y:unpack())
             end
