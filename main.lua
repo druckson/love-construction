@@ -4,12 +4,13 @@ local matrix = require "utils/matrix"
 local vector = require "lib/hump/vector"
 local entity = require "entity"
 local systems = require "systems"
+local integrators = require "utils/integrators"
 
 local mode = love.graphics.getModes()[1]
 local worldSize = vector.new(1000, 1000)
 local screenSize = vector.new(mode.width, mode.height)
 
-local physics = systems.Physics()
+local physics = systems.Physics(integrators.RK4)
 local display = systems.Display()
 local player = systems.Player(display)
 local construction = systems.Construction()
@@ -22,7 +23,7 @@ function createJoinPoint(parent, color, x, y, r)
     construction:add(childBlock)
 end
 
-function createBlock(color, position, isPlayer)
+function createBlock(color, position, isPlayer, velocity)
     local mainBlock = entity.new()
     mainBlock.transform:setPosition(position:unpack())
 
@@ -31,6 +32,9 @@ function createBlock(color, position, isPlayer)
     
     display:add(mainBlock, "square", color, {size=1})
     physics:add(mainBlock, love.physics.newRectangleShape(0.5, 0.5), "dynamic")
+    if velocity then
+        mainBlock.physics.body:setLinearVelocity(velocity:unpack())
+    end
 
 
     if isPlayer then
@@ -49,7 +53,7 @@ function createGlobe(center, color, radius)
     local globe = entity.new()
     globe.transform:setPosition(center:unpack())
     display:add(globe, "circle", color, {radius=radius})
-    physics:addGravity(center.x, center.y, 0.000001*radius*radius)
+    physics:addGravity(center.x, center.y, 0.01*radius*radius)
     
     local segments = 100
     local translate = matrix.translate(worldSize.x / 2, worldSize.y / 2)
@@ -83,6 +87,8 @@ function test1()
     local wx = worldSize.x
     local wy = worldSize.y
 
+    local gr = iterateGR(0)
+
     local center = worldSize * 0.5
     local radius = math.min(worldSize.x, worldSize.y) * 0.3
     createGlobe(center, {60, 60, 60, 255}, radius)
@@ -92,15 +98,19 @@ function test1()
     --physics:add(entity.new(), love.physics.newEdgeShape(wx, wy,  0, wy), "static")
     --physics:add(entity.new(), love.physics.newEdgeShape( 0, wy,  0,  0), "static")
 
-    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
-    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
-    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
-    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), vector.new(math.random(wx), math.random(wy)), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), vector.new(math.random(wx), math.random(wy)), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), vector.new(math.random(wx), math.random(wy)), false))
+    --table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), vector.new(math.random(wx), math.random(wy)), false))
     
     local gr = iterateGR(0)
 
-    for i = 0, 50 do
-        table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), center + radialToCartesian(radius*1.1, 2*math.pi*gr()), false))
+    for i = 0, 300 do
+        table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), vector.new(500, 50), false, vector.new(-30, 0)))
+    end
+
+    for i = 0, 300 do
+        table.insert(parentBlocks, createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), vector.new(500, 950), false, vector.new(30, 0)))
     end
 
     --locator = construction:connect(parentBlocks[1].transform.children[1].object,
@@ -115,6 +125,8 @@ function test2()
         table.insert(parentBlocks, createBlock())
     end
 
+
+
     
 end
 
@@ -127,7 +139,7 @@ function love.load()
 
     test1()
 
-    local p1 = createBlock(color.HsvToRgb(0, 0.7, 0.7, 1.0), radialToCartesian(100, 0), true)
+    local p1 = createBlock(color.HsvToRgb(0, 0.7, 0.7, 1.0), vector.new(600, 0), true, vector.new(-30, 0))
 end
 
 function love.keypressed(k)

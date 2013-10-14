@@ -3,7 +3,8 @@ local entity = require "entity"
 local Class = require "lib/hump/class"
 
 local Physics = Class{
-    init = function(self)
+    init = function(self, integrator)
+        self.integrator = integrator
         self.world = love.physics.newWorld(0, 0, true)
         self.objects = {}
     end
@@ -24,8 +25,8 @@ function Physics:add(object, shape, bodyType)
     table.insert(self.objects, object)
 end
 
-function Physics:addGravity(x, y, strength) 
-    self.strength = strength
+function Physics:addGravity(x, y, mass) 
+    self.mass = mass
     self.center = vector.new(x, y)
 end
 
@@ -38,15 +39,28 @@ function Physics:remove(object)
 end
 
 function Physics:update(dt)
-    self.world:update(dt)
+    local physics = self
     for _, object in pairs(self.objects) do
         if object.transform.parent == nil then
-            if self.center and self.strength then
-                local gravityVector = (self.center - object.transform.position)
-                gravityVector = gravityVector * (self.strength / gravityVector:len2())
-                object.physics.body:applyForce(gravityVector:unpack())
+            if self.center and self.mass then
+                local position = object.transform.position
+                local velocity = vector.new(object.physics.body:getLinearVelocity())
+                local state = vector.new(position, velocity)
+                _, state = self.integrator(0, dt, state, function(_, state)
+                    local position = state.x
+                    local gravityVector = (physics.center - position)
+                    gravityVector = gravityVector * (physics.mass / gravityVector:len2())
+                    return vector.new(state.y, gravityVector)
+                end)
+                object.physics.body:setLinearVelocity(state.y:unpack())
             end
+        end
+    end
 
+    self.world:update(dt)
+
+    for _, object in pairs(self.objects) do
+        if object.transform.parent == nil then
             object.transform.position = vector.new(object.physics.body:getPosition())
             object.transform.rotation = object.physics.body:getAngle()
         end

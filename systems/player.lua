@@ -38,9 +38,9 @@ function Player:update(dt)
             love.mouse.getY())
     end
 
-    local velocity = vector.new(self.object.physics.body:getLinearVelocity()):normalized()
-    self.object.player.cameraAngle = math.pi + velocity:angleTo()
-    --self.object.player.cameraAngle = rotation
+    --local velocity = vector.new(self.object.physics.body:getLinearVelocity()):normalized()
+    --self.object.player.cameraAngle = math.pi + velocity:angleTo()
+    self.object.player.cameraAngle = rotation
 
     local zoomSpeed = dt*10
     local zoom = 0
