@@ -16,8 +16,7 @@ local construction = systems.Construction()
 
 function love.load()   
     display:setScreenSize(screenSize.x, screenSize.y)
-    --local scene = scenes.Scene1(display, physics, player)
-    local scene = scenes.Scene2(display, physics, player)
+    local scene = scenes.Scene1(display, physics, player)
 end
 
 function love.keypressed(k)
