@@ -24,15 +24,16 @@ local Scene = Class{
 
         local gr = iterateGR(0)
 
-        self.globe = self:createGlobe(vector.new(0, 0), color.HsvToRgb(0.5, 0.7, 0.7, 1.0),
-            100, 30, 500)
+        self.sun =      self:createGlobe(vector.new(0, 0),     color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 500,  0, 1000)
 
-        self.player1 = self:createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 
-            vector.new(400, 0), true, vector.new(0, -30))
-        for i = 0, 50 do
-            self:createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 
-                vector.new(400, 0), true, vector.new(0, -30))
-        end
+        self.planet1 =  self:createGlobe(vector.new( 5000, 0), color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 100, 20, 200, vector.new(0, -50))
+        self.planet2 =  self:createGlobe(vector.new(-5000, 0), color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 100, 20, 200, vector.new(0,  50))
+
+        self.player1 = self:createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), vector.new(5150, 0), true, 1, vector.new(0, -45))
+        --for i = 0, 50 do
+        --    self:createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 
+        --        vector.new(2200, 0), true, 1, vector.new(0, -10))
+        --end
     end
 }
 
@@ -44,7 +45,7 @@ function Scene:createJoinPoint(parent, color, x, y, r)
     construction:add(childBlock)
 end
 
-function Scene:createBlock(color, position, isPlayer, velocity)
+function Scene:createBlock(color, position, isPlayer, mass, velocity)
     local mainBlock = entity.new()
     mainBlock.transform:setPosition(position:unpack())
 
@@ -52,7 +53,7 @@ function Scene:createBlock(color, position, isPlayer, velocity)
         math.random()*2*math.pi)
     
     self.display:add(mainBlock, "square", color, {size=1})
-    self.physics:add(mainBlock, love.physics.newRectangleShape(0.5, 0.5), "dynamic")
+    self.physics:add(mainBlock, love.physics.newRectangleShape(0.5, 0.5), "dynamic", mass)
     if velocity then
         mainBlock.physics.body:setLinearVelocity(velocity:unpack())
     end
@@ -70,19 +71,24 @@ function Scene:createBlock(color, position, isPlayer, velocity)
     return mainBlock
 end
 
-function Scene:createGlobe(center, color, radius, atmosphere, mass)
+function Scene:createGlobe(center, color, radius, atmosphere, mass, velocity)
     local globe = entity.new()
     globe.transform:setPosition(center:unpack())
     self.display:add(globe, "circle", color, {radius=radius})
-    self.physics:addGravity(center.x, center.y, radius, radius+atmosphere, mass)
-    
-    local segments = 100
-    local translate = matrix.translate(center:unpack())
-    for i = 0, segments do
-        local p1 = center + radialToCartesian(radius, 2*math.pi*i / segments)
-        local p2 = center + radialToCartesian(radius, 2*math.pi*(i + 1) / segments)
-        self.physics:add(entity.new(), love.physics.newEdgeShape(p1.x, p1.y, p2.x, p2.y), "static")
+    self.physics:add(globe, love.physics.newCircleShape(radius), "dynamic", mass)
+    self.physics:addGravityObject(globe, radius, radius+atmosphere)
+
+    if velocity then
+        globe.physics.body:setLinearVelocity(velocity:unpack())
     end
+    
+    --local segments = 100
+    --local translate = matrix.translate(center:unpack())
+    --for i = 0, segments do
+    --    local p1 = center + radialToCartesian(radius, 2*math.pi*i / segments)
+    --    local p2 = center + radialToCartesian(radius, 2*math.pi*(i + 1) / segments)
+    --    self.physics:add(entity.new(), love.physics.newEdgeShape(p1.x, p1.y, p2.x, p2.y), "static")
+    --end
 
     return globe
 end
