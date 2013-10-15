@@ -42,7 +42,7 @@ function Player:update(dt)
     --self.object.player.cameraAngle = math.pi + velocity:angleTo()
     self.object.player.cameraAngle = rotation
 
-    local zoomSpeed = dt*10
+    local zoomSpeed = dt*50
     local zoom = 0
     if love.keyboard.isDown("x") then zoom = zoom + zoomSpeed end
     if love.keyboard.isDown("c") then zoom = zoom - zoomSpeed end
@@ -52,7 +52,7 @@ function Player:update(dt)
 
     self.object.physics.body:applyForce(velocity:unpack())
     --self.object.physics.body:applyTorque(self.object.player.cameraAngle - rotation)
-    self.object.player.zoom = math.max(0.01, math.min(100, self.object.player.zoom + zoom))
+    self.object.player.zoom = math.max(0.01, math.min(1000, self.object.player.zoom + zoom))
 
     self.display:moveCamera(self.object.transform.position.x,
                             self.object.transform.position.y)
