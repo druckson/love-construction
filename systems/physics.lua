@@ -8,10 +8,37 @@ local Physics = Class{
     init = function(self, integrator)
         self.integrator = integrator
         self.world = love.physics.newWorld(0, 0, true)
+
+        self.world:setCallbacks(function(...)
+            self:beginContact(...)
+        end, function(...)
+            self:endContact(...)
+        end, function(...)
+            self:preSolve(...)
+        end, function(...)
+            self:postSolve(...)
+        end)
+
         self.objects = {}
         self.gravityObjects = {}
     end
 }
+
+function Physics:beginContact(a, b, collision)
+
+end
+
+function Physics:endContact(a, b, collision)
+
+end
+
+function Physics:preSolve(a, b, collision)
+
+end
+
+function Physics:postSolve(a, b, collision)
+
+end
 
 function Physics:add(object, shape, bodyType, mass)
     local body = love.physics.newBody(self.world, 
@@ -39,7 +66,7 @@ function Physics:addGravityObject(object, radius, atmosphereRadius, atmosphereDe
         radius = radius,
         atmosphere = {
             radius = atmosphereRadius,
-            density = atmosphereDensity
+            density = atmosphereDensity or 0.01
         }
     })
 end
@@ -77,8 +104,12 @@ function Physics:update(dt)
                             local atmosphereRadius = gravityObject.atmosphere.radius
                             local atmosphereRadius2 = atmosphereRadius * atmosphereRadius
 
+                            local drag = invlerp(atmosphereRadius2, radius2, gravityDist2) * gravityObject.atmosphere.density
+
+                            local localVelocity = velocity - vector.new(gravityObject.object.physics.body:getLinearVelocity())
+
                             if gravityDist2 < atmosphereRadius2 then
-                                acceleration = acceleration - (velocity * invlerp(atmosphereRadius2, radius2, gravityDist2) * 0.2)
+                                acceleration = acceleration - (localVelocity * drag)
                             end
                         end
                     end
