@@ -40,13 +40,13 @@ function Physics:postSolve(a, b, collision)
 
 end
 
-function Physics:add(object, shape, bodyType, mass)
+function Physics:add(object, shape, bodyType, density)
     local body = love.physics.newBody(self.world, 
                                       object.transform.position.x, 
                                       object.transform.position.y,
                                       bodyType)
     body:setAngle(-object.transform.rotation)
-    local fixture = love.physics.newFixture(body, shape, 1)
+    local fixture = love.physics.newFixture(body, shape, density or 1)
     object.physics = {
         body = body,
         fixture = fixture,
@@ -97,7 +97,8 @@ function Physics:update(dt)
                             local gravityVector = 
                                 (gravityObject.object.transform.position - position)
                             local gravityDist2 = gravityVector:len2()
-                            acceleration = acceleration + (gravityVector * (gravityObject.object.physics.mass / gravityDist2))
+                            local mass = gravityObject.object.physics.body:getMass()
+                            acceleration = acceleration + (gravityVector * (mass / gravityDist2))
 
                             local radius = gravityObject.radius
                             local radius2 = radius * radius

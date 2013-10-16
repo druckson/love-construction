@@ -24,10 +24,10 @@ local Scene = Class{
 
         local gr = iterateGR(0)
 
-        self.sun =      self:createGlobe(vector.new(0, 0),     color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 500,  0, 1000)
+        self.sun =      self:createGlobe(vector.new(0, 0),     color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 500,  0, 1)
 
-        self.planet1 =  self:createGlobe(vector.new( 5000, 0), color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 100, 20, 200, vector.new(0, -50))
-        self.planet2 =  self:createGlobe(vector.new(-5000, 0), color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 100, 20, 200, vector.new(0,  50))
+        self.planet1 =  self:createGlobe(vector.new( 5000, 0), color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 100, 20, 1, vector.new(0, -50))
+        self.planet2 =  self:createGlobe(vector.new(-5000, 0), color.HsvToRgb(gr(), 0.7, 0.7, 1.0), 100, 20, 1, vector.new(0,  50))
 
         self.player1 = self:createBlock(color.HsvToRgb(gr(), 0.7, 0.7, 1.0), vector.new(5150, 0), true, 1, vector.new(0, -45))
         --for i = 0, 50 do
@@ -45,7 +45,7 @@ function Scene:createJoinPoint(parent, color, x, y, r)
     construction:add(childBlock)
 end
 
-function Scene:createBlock(color, position, isPlayer, mass, velocity)
+function Scene:createBlock(color, position, isPlayer, density, velocity)
     local mainBlock = entity.new()
     mainBlock.transform:setPosition(position:unpack())
 
@@ -53,7 +53,7 @@ function Scene:createBlock(color, position, isPlayer, mass, velocity)
         math.random()*2*math.pi)
     
     self.display:add(mainBlock, "square", color, {size=1})
-    self.physics:add(mainBlock, love.physics.newRectangleShape(0.5, 0.5), "dynamic", mass)
+    self.physics:add(mainBlock, love.physics.newRectangleShape(0.5, 0.5), "dynamic", density)
     if velocity then
         mainBlock.physics.body:setLinearVelocity(velocity:unpack())
     end
@@ -71,11 +71,11 @@ function Scene:createBlock(color, position, isPlayer, mass, velocity)
     return mainBlock
 end
 
-function Scene:createGlobe(center, color, radius, atmosphere, mass, velocity)
+function Scene:createGlobe(center, color, radius, atmosphere, density, velocity)
     local globe = entity.new()
     globe.transform:setPosition(center:unpack())
     self.display:add(globe, "circle", color, {radius=radius})
-    self.physics:add(globe, love.physics.newCircleShape(radius), "dynamic", mass)
+    self.physics:add(globe, love.physics.newCircleShape(radius), "dynamic", density)
     self.physics:addGravityObject(globe, radius, radius+atmosphere)
 
     if velocity then
