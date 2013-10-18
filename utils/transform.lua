@@ -1,24 +1,23 @@
 local vector = require "lib/hump/vector"
 local matrix = require "utils/matrix"
+local Class = require "lib/hump/class"
 
 local Transform = {}
 Transform.__index = Transform
 
-function Transform.new(object, parent)
-    local newTransform = setmetatable({
-        object = object,
-        position = vector.new(0, 0),
-        rotation = 0,
-        children = {},
-        parent = nil
-    }, Transform)
+local Transform = Class{
+    init = function(self, object, parent)
+        self.object = object
+        self.position = vector.new(0, 0)
+        self.rotation = 0
+        self.children = {}
+        self.parent = nil
 
-    if parent ~= nil then
-        newTransform:setParent(parent)
+        if parent ~= nil then
+            newTransform:setParent(parent)
+        end
     end
-
-    return newTransform
-end
+}
 
 function Transform:addChild(child)
     table.insert(self.children, child)
