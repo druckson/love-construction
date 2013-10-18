@@ -23,7 +23,7 @@ engine:addSystem("construction", construction)
 
 function love.load()   
     display:setScreenSize(screenSize.x, screenSize.y)
-    local scene = scenes.Scene3(engine)
+    local scene = scenes.Scene1(engine)
 end
 
 function love.keypressed(k)
