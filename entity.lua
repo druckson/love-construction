@@ -1,5 +1,5 @@
 local vector = require "lib/hump/vector"
-local transform = require "utils/transform"
+local Transform = require "utils/transform"
 
 local Entity = {
     objects = {}
@@ -14,7 +14,7 @@ function Entity.new(parent)
     end
 
     local newEntity = {}
-    newEntity.transform = transform.new(newEntity, parentTransform)
+    newEntity.transform = Transform(newEntity, parentTransform)
     return setmetatable(newEntity, Entity)
 end
 

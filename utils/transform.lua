@@ -6,15 +6,15 @@ local Transform = {}
 Transform.__index = Transform
 
 local Transform = Class{
-    init = function(self, object, parent)
-        self.object = object
+    init = function(self, entity, parent)
+        self.entity = entity
         self.position = vector.new(0, 0)
         self.rotation = 0
         self.children = {}
         self.parent = nil
 
         if parent ~= nil then
-            newTransform:setParent(parent)
+            self:setParent(parent)
         end
     end
 }

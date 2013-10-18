@@ -18,10 +18,13 @@ function Engine:addSystem(name, system)
 end
 
 function Engine:createEntity(data)
-    local entity = {
-         transform = Transform(entity)
-    }
-    entity.transform:setPosition(data.transform.position[0], data.transform.position[1])
+    local entity = {}
+
+    entity.transform = Transform(entity)
+    if data.transform.parent then
+        entity.transform:setParent(data.transform.parent)
+    end
+    entity.transform:setPosition(data.transform.position[1], data.transform.position[2])
     entity.transform:setRotation(data.transform.rotation)
 
     for key, value in pairs(data) do
