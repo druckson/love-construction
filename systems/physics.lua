@@ -62,16 +62,25 @@ local function CreateShape(data)
     return nil
 end
 
-function Physics:init_entity(entity, object)
+function Physics:init_entity(entity, data)
     local body = love.physics.newBody(self.world,
                                     entity.transform.position.x, 
                                     entity.transform.position.y,
-                                    object.physics.bodyType)
-    local  fixture = love.physics.newFixture(body, CreateShape(object.physics.shape), object.physics.density or 1)
+                                    data.physics.bodyType)
+    local  fixture = love.physics.newFixture(body, CreateShape(data.physics.shape), data.physics.density or 1)
 
     body:setAngle(-entity.transform.rotation)
 
     entity.physics = {body = body, fixture = fixture}
+
+    if data.physics.velocity then
+        body:setLinearVelocity(data.physics.velocity[1], data.physics.velocity[2])
+    end
+
+    if data.physics.gravity then
+        entity.physics.gravity = data.physics.gravity
+        table.insert(self.gravityObjects, entity)
+    end
 
     table.insert(self.entities, entity)
 end
@@ -85,21 +94,6 @@ function Physics:remove_entity(entity)
             table.remove(self.entities, key)
         end
     end
-end
-
-function Physics:addCustomConstraint(constraint)
-
-end
-
-function Physics:addGravityObject(object, radius, atmosphereRadius, atmosphereDensity) 
-    table.insert(self.gravityObjects, {
-        object = object,
-        radius = radius,
-        atmosphere = {
-            radius = atmosphereRadius,
-            density = atmosphereDensity or 0.01
-        }
-    })
 end
 
 function Physics:update(dt)
@@ -116,21 +110,21 @@ function Physics:update(dt)
                     local acceleration = vector.new(0, 0)
 
                     for _, gravityObject in pairs(physics.gravityObjects) do
-                        if entity ~= gravityObject.entity then
+                        if entity ~= gravityObject then
                             local gravityVector = 
-                                (gravityObject.entity.transform.position - position)
+                                (gravityObject.transform.position - position)
                             local gravityDist2 = gravityVector:len2()
-                            local mass = gravityObject.entity.physics.body:getMass()
+                            local mass = gravityObject.physics.body:getMass()
                             acceleration = acceleration + (gravityVector * (mass / gravityDist2))
 
-                            local radius = gravityObject.radius
+                            local radius = gravityObject.physics.gravity.atmosphere.radius
                             local radius2 = radius * radius
-                            local atmosphereRadius = gravityObject.atmosphere.radius
+                            local atmosphereRadius = gravityObject.physics.gravity.atmosphere.level
                             local atmosphereRadius2 = atmosphereRadius * atmosphereRadius
 
-                            local drag = invlerp(atmosphereRadius2, radius2, gravityDist2) * gravityObject.atmosphere.density
+                            local drag = invlerp(atmosphereRadius2, radius2, gravityDist2) * gravityObject.physics.gravity.atmosphere.density
 
-                            local localVelocity = velocity - vector.new(gravityObject.entity.physics.body:getLinearVelocity())
+                            local localVelocity = velocity - vector.new(gravityObject.physics.body:getLinearVelocity())
 
                             if gravityDist2 < atmosphereRadius2 then
                                 acceleration = acceleration - (localVelocity * drag)
