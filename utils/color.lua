@@ -21,7 +21,7 @@ function Color.HsvToRgb(h, s, v, a)
     elseif 5 <= sixh and sixh < 6 then
         return {c, 0, x, a}
     end
-    return {0, 0, 0, 266}
+    return {0, 0, 0, 255}
 end
 
 return Color
