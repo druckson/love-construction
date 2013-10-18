@@ -1,5 +1,14 @@
 local vector = require "lib/hump/vector"
 local Class = require "lib/hump/class"
+local color = require "utils/color"
+
+local function getColor(data)
+    if data.space == "hsva" then
+        return color.HsvToRgb(data.h, data.s, data.v, data.a)
+    elseif data.space == "rgba" then
+        return {data.r, data.g, data.b, data.a}
+    end
+end
 
 local Display = Class{
     init = function(self)
@@ -9,61 +18,70 @@ local Display = Class{
             rotation = 0,
             zoom = 1
         }
-        self.objects = {}
+        self.entities = {}
         self.speedometer = ""
     end
 }
 
-function Display:add(object, shape, color, properties)
-    object.display = {
-        shape = shape,
-        color = color,
-        properties = properties
-    }
-    table.insert(self.objects, object)
+function Display:setup(engine)
+    local display = self
+    engine.registry:register("init_entity", function(...)
+        display:init_entity(...)
+    end)
+    engine.registry:register("remove_entity", function(...)
+        display:remove_entity(...)
+    end)
 end
 
-function Display:remove(object)
-    for key, value in pairs(self.objects) do
-        if value == object then
-            table.remove(self.objects, key)
+function Display:init_entity(entity, data)
+    entity.display = {
+        shape = data.display.shape,
+        color = getColor(data.display.color),
+    }
+    table.insert(self.entities, entity)
+end
+
+function Display:remove_entity(entity)
+    for key, value in pairs(self.entities) do
+        if value == entity then
+            table.remove(self.entities, key)
         end
     end
 end
 
-function Display:displayChildren(object)
+function Display:displayChildren(entity)
     love.graphics.push()
-    love.graphics.translate(object.transform.position.x, object.transform.position.y)
-    love.graphics.rotate(object.transform.rotation)
+    love.graphics.translate(entity.transform.position.x, entity.transform.position.y)
+    love.graphics.rotate(entity.transform.rotation)
 
-    if object.display ~= nil then
-        love.graphics.setColor(object.display.color)
+    if entity.display ~= nil then
+        love.graphics.setColor(entity.display.color)
 
-        local properties = object.display.properties
-        if object.display.shape == "rect" then
-            love.graphics.rectangle("fill", -properties.size.x/2, -properties.size.y/2,
-                                    properties.size.x, 
-                                    properties.size.y)
-        elseif object.display.shape == "square" then
-            love.graphics.rectangle("fill", -properties.size/2, -properties.size/2,
-                                    properties.size, 
-                                    properties.size)
-        elseif object.display.shape == "circle" then
-            love.graphics.circle("fill", 0, 0, properties.radius)
-        elseif object.display.shape == "triangle" then
+        local properties = entity.display.properties
+        if entity.display.shape.type == "rect" then
+            local width  = entity.display.shape.width
+            local height = entity.display.shape.height
+            love.graphics.rectangle("fill", -width/2, -height/2, width, height)
+        elseif entity.display.shape.type == "square" then
+            local sideLength = entity.display.shape.sideLength
+            love.graphics.rectangle("fill", -sideLength/2, -sideLength/2, sideLength, sideLength)
+        elseif entity.display.shape.type == "circle" then
+            love.graphics.circle("fill", 0, 0, entity.display.shape.radius)
+        elseif entity.display.shape.type == "triangle" then
+            local radius = entity.display.shape.radius
             local points = {}
             love.graphics.polygon("fill", {
-                math.cos(0)*properties.radius, 
-                math.sin(0)*properties.radius,
-                math.cos(2*math.pi/3)*properties.radius, 
-                math.sin(2*math.pi/3)*properties.radius,
-                math.cos(4*math.pi/3)*properties.radius, 
-                math.sin(4*math.pi/3)*properties.radius})
+                math.cos(0)*radius, 
+                math.sin(0)*radius,
+                math.cos(2*math.pi/3)*radius, 
+                math.sin(2*math.pi/3)*radius,
+                math.cos(4*math.pi/3)*radius, 
+                math.sin(4*math.pi/3)*radius})
         end
     end
 
-    for _, child in pairs(object.transform.children) do
-        self:displayChildren(child.object)
+    for _, child in pairs(entity.transform.children) do
+        self:displayChildren(child.entity)
     end
 
     love.graphics.pop()
@@ -103,9 +121,9 @@ function Display:display()
     love.graphics.scale(zoom, zoom)
     love.graphics.translate(-self.camera.position.x, -self.camera.position.y)
 
-    for _, object in pairs(self.objects) do
-        if object.transform.parent == nil then
-            self:displayChildren(object)
+    for _, entity in pairs(self.entities) do
+        if entity.transform.parent == nil then
+            self:displayChildren(entity)
         end
     end
     love.graphics.pop()
