@@ -1,4 +1,4 @@
-local transform = require"../utils/transform"
+local transform = require "utils/transform"
 local vector = require "lib/hump/vector"
 local entity = require "entity"
 local interpolaters = require "utils/interpolaters"
@@ -6,6 +6,8 @@ local Class = require "lib/hump/class"
 
 local Physics = Class{
     init = function(self, integrator)
+        local physics = self
+
         self.integrator = integrator
         self.world = love.physics.newWorld(0, 0, true)
 
@@ -19,10 +21,20 @@ local Physics = Class{
             self:postSolve(...)
         end)
 
-        self.objects = {}
+        self.entities = {}
         self.gravityObjects = {}
     end
 }
+
+function Physics:setup(engine)
+    local physics = self
+    engine.registry:register("init_entity", function(...)
+        physics:init_entity(...)
+    end)
+    engine.registry:register("remove_entity", function(...)
+        physics:remove_entity(...)
+    end)
+end
 
 function Physics:beginContact(a, b, collision)
 
@@ -40,20 +52,39 @@ function Physics:postSolve(a, b, collision)
 
 end
 
-function Physics:add(object, shape, bodyType, density)
-    local body = love.physics.newBody(self.world, 
-                                      object.transform.position.x, 
-                                      object.transform.position.y,
-                                      bodyType)
-    body:setAngle(-object.transform.rotation)
-    local fixture = love.physics.newFixture(body, shape, density or 1)
-    object.physics = {
-        body = body,
-        fixture = fixture,
-        mass = mass
-    }
+local function CreateShape(data)
+    local shape
+    if data.type == "circle" then
+        return love.physics.newCircleShape(data.radius)
+    elseif data.type == "square" then
+        return love.physics.newRectangleShape(data.sideLength, data.sideLength)
+    end
+    return nil
+end
 
-    table.insert(self.objects, object)
+function Physics:init_entity(entity, object)
+    local body = love.physics.newBody(self.world,
+                                    entity.transform.position.x, 
+                                    entity.transform.position.y,
+                                    object.physics.bodyType)
+    local  fixture = love.physics.newFixture(body, CreateShape(object.physics.shape), object.physics.density or 1)
+
+    body:setAngle(-entity.transform.rotation)
+
+    entity.physics = {body = body, fixture = fixture}
+
+    table.insert(self.entities, entity)
+end
+
+function Physics:remove_entity(entity)
+    for key, value in self.entities do
+        if value == entity then
+            entity.physics.body:destroy()
+            entity.physics.fixture:destroy()
+            table.remove(entity, "physics")
+            table.remove(self.entities, key)
+        end
+    end
 end
 
 function Physics:addCustomConstraint(constraint)
@@ -71,21 +102,13 @@ function Physics:addGravityObject(object, radius, atmosphereRadius, atmosphereDe
     })
 end
 
-function Physics:remove(object)
-    for key, value in self.objects do
-        if value == object then
-            table.remove(self.objects, key)
-        end
-    end
-end
-
 function Physics:update(dt)
     local physics = self
-    for _, object in pairs(self.objects) do
-        if object.transform.parent == nil then
+    for _, entity in pairs(self.entities) do
+        if entity.transform.parent == nil then
             if #physics.gravityObjects > 0 then
-                local position = object.transform.position
-                local velocity = vector.new(object.physics.body:getLinearVelocity())
+                local position = entity.transform.position
+                local velocity = vector.new(entity.physics.body:getLinearVelocity())
                 local state = vector.new(position, velocity)
                 _, state = self.integrator(0, dt, state, function(_, state)
                     local position = state.x
@@ -93,11 +116,11 @@ function Physics:update(dt)
                     local acceleration = vector.new(0, 0)
 
                     for _, gravityObject in pairs(physics.gravityObjects) do
-                        if object ~= gravityObject.object then
+                        if entity ~= gravityObject.entity then
                             local gravityVector = 
-                                (gravityObject.object.transform.position - position)
+                                (gravityObject.entity.transform.position - position)
                             local gravityDist2 = gravityVector:len2()
-                            local mass = gravityObject.object.physics.body:getMass()
+                            local mass = gravityObject.entity.physics.body:getMass()
                             acceleration = acceleration + (gravityVector * (mass / gravityDist2))
 
                             local radius = gravityObject.radius
@@ -107,7 +130,7 @@ function Physics:update(dt)
 
                             local drag = invlerp(atmosphereRadius2, radius2, gravityDist2) * gravityObject.atmosphere.density
 
-                            local localVelocity = velocity - vector.new(gravityObject.object.physics.body:getLinearVelocity())
+                            local localVelocity = velocity - vector.new(gravityObject.entity.physics.body:getLinearVelocity())
 
                             if gravityDist2 < atmosphereRadius2 then
                                 acceleration = acceleration - (localVelocity * drag)
@@ -117,17 +140,17 @@ function Physics:update(dt)
 
                     return vector.new(velocity, acceleration)
                 end)
-                object.physics.body:setLinearVelocity(state.y:unpack())
+                entity.physics.body:setLinearVelocity(state.y:unpack())
             end
         end
     end
 
     self.world:update(dt)
 
-    for _, object in pairs(self.objects) do
-        if object.transform.parent == nil then
-            object.transform.position = vector.new(object.physics.body:getPosition())
-            object.transform.rotation = object.physics.body:getAngle()
+    for _, entity in pairs(self.entities) do
+        if entity.transform.parent == nil then
+            entity.transform.position = vector.new(entity.physics.body:getPosition())
+            entity.transform.rotation = entity.physics.body:getAngle()
         end
     end
 end

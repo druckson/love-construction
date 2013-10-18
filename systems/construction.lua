@@ -5,19 +5,30 @@ local Class = require "lib/hump/class"
 
 local Construction = Class{
     init = function(self)
-        self.objects = {}
+        self.entities = {}
     end
 }
 
-function Construction:add(object)
-    object.construction = {}
-    table.insert(self.objects, object)
+function Construction:setup(engine)
+    local construction = self
+    engine.registry:register("init_entity", function(...)
+        construction:init_entity(...)
+    end)
+    engine.registry:register("remove_entity", function(...)
+        construction:remove_entity(...)
+    end)
 end
 
-function Construction:remove(object)
-    for key, value in self.objects do
-        if value == object then
-            table.remove(self.objects, key)
+function Construction:init_entity(entity, object)
+    entity.construction = {}
+    table.insert(self.entities, entity)
+end
+
+function Construction:remove_entity(entity)
+    for key, value in self.entities do
+        if value == entity then
+            table.remove(entity, "construction")
+            table.remove(self.entities, key)
         end
     end
 end
