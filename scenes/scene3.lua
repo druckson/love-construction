@@ -44,10 +44,16 @@ function Scene:createBlock(engine, position, color, rotation, density, isPlayer,
         physics = {
             bodyType = "dynamic",
             density = density,
+            shape = {
+                type = "square",
+                sideLength = 1
+            }
+        },
+        display = {
             color = color,
             shape = {
                 type = "square",
-                sideLength = 0.5
+                sideLength = 1
             }
         }
     }
