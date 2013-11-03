@@ -1,7 +1,6 @@
 local vector = require "lib/hump/vector"
 local Class = require "lib/hump/class"
 local color = require "utils/color"
-local shapes = require "utils/shapes"
 
 local function getColor(data)
     if data.space == "hsva" then
@@ -35,10 +34,12 @@ function Display:setup(engine)
 end
 
 function Display:init_entity(entity, data)
-    entity.display = {
-        shape = data.display.shape,
-        color = getColor(data.display.color),
-    }
+    if data then
+        entity.display = {
+            shape = data.display.shape,
+            color = getColor(data.display.color),
+        }
+    end
     table.insert(self.entities, entity)
 end
 
@@ -125,7 +126,7 @@ function Display:display()
     love.graphics.translate(-self.camera.position.x, -self.camera.position.y)
 
     for _, entity in pairs(self.entities) do
-        if entity.transform.parent == nil then
+        if not entity.transform.parent then
             self:displayChildren(entity)
         end
     end
