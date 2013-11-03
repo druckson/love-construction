@@ -3,6 +3,7 @@ local vector = require "lib/hump/vector"
 local entity = require "entity"
 local interpolaters = require "utils/interpolaters"
 local Class = require "lib/hump/class"
+local shapes = require "utils/shapes"
 
 local Physics = Class{
     init = function(self, integrator)
@@ -10,6 +11,7 @@ local Physics = Class{
 
         self.integrator = integrator
         self.world = love.physics.newWorld(0, 0, true)
+        --love.physics.setMeter(1)
 
         self.world:setCallbacks(function(...)
             self:beginContact(...)
@@ -27,21 +29,22 @@ local Physics = Class{
 }
 
 function Physics:setup(engine)
+    self.engine = engine
     local physics = self
-    engine.registry:register("init_entity", function(...)
+    engine.messaging:register("init_entity", function(...)
         physics:init_entity(...)
     end)
-    engine.registry:register("remove_entity", function(...)
+    engine.messaging:register("remove_entity", function(...)
         physics:remove_entity(...)
     end)
 end
 
 function Physics:beginContact(a, b, collision)
-
+    self.engine.messaging:emit("begin_contact", a, b, collision)
 end
 
 function Physics:endContact(a, b, collision)
-
+    self.engine.messaging:emit("end_contact", a, b, collision)
 end
 
 function Physics:preSolve(a, b, collision)
@@ -54,43 +57,75 @@ end
 
 local function CreateShape(data)
     local shape
-    if data.type == "circle" then
-        return love.physics.newCircleShape(data.radius)
-    elseif data.type == "square" then
-        return love.physics.newRectangleShape(data.sideLength, data.sideLength)
+    --if data.type == "circle" then
+    --    return love.physics.newCircleShape(data.radius)
+    --elseif data.type == "square" then
+    --    return love.physics.newRectangleShape(data.sideLength/2, data.sideLength/2)
+    --end
+    
+    if shapes[data.type] then
+        print(shapes[data.type](data, 0, 0))
+        return shapes[data.type](data, 0, 0)
     end
     return nil
 end
 
 function Physics:init_entity(entity, data)
+    entity.physics = {
+        data = data.physics
+    }
+    self:enable_physics(entity)
+end
+
+function Physics:enable_physics(entity)
+    local position = entity.transform:getAbsolutePosition()
     local body = love.physics.newBody(self.world,
-                                    entity.transform.position.x, 
-                                    entity.transform.position.y,
-                                    data.physics.bodyType)
-    local  fixture = love.physics.newFixture(body, CreateShape(data.physics.shape), data.physics.density or 1)
+                                    position.x,
+                                    position.y,
+                                    entity.physics.data.bodyType)
+    local  fixture = love.physics.newFixture(body, 
+                                             CreateShape(entity.physics.data.shape), 
+                                             entity.physics.data.density or 1)
+    fixture:setUserData(entity)
 
-    body:setAngle(-entity.transform.rotation)
+    body:setAngle(-entity.transform:getAbsoluteRotation())
 
-    entity.physics = {body = body, fixture = fixture}
+    entity.physics.body = body
+    entity.physics.fixture = fixture
 
-    if data.physics.velocity then
-        body:setLinearVelocity(data.physics.velocity[1], data.physics.velocity[2])
+    if entity.physics.data.velocity then
+        body:setLinearVelocity(entity.physics.data.velocity[1], 
+                               entity.physics.data.velocity[2])
     end
 
-    if data.physics.gravity then
-        entity.physics.gravity = data.physics.gravity
+    if entity.physics.data.gravity then
+        entity.physics.gravity = entity.physics.data.gravity
         table.insert(self.gravityObjects, entity)
     end
 
     table.insert(self.entities, entity)
 end
 
-function Physics:remove_entity(entity)
-    for key, value in self.entities do
+function Physics:disable_physics(entity)
+    entity.physics.fixture:destroy()
+    entity.physics.fixture = nil
+
+    entity.physics.body:destroy()
+    entity.physics.body = nil
+
+    for key, value in pairs(self.entities) do
         if value == entity then
-            entity.physics.body:destroy()
+            table.remove(self.entities, key)
+        end
+    end
+end
+
+function Physics:remove_entity(entity)
+    for key, value in pairs(self.entities) do
+        if value == entity then
             entity.physics.fixture:destroy()
-            table.remove(entity, "physics")
+            entity.physics.body:destroy()
+            --entity.physics = nil
             table.remove(self.entities, key)
         end
     end
@@ -145,6 +180,9 @@ function Physics:update(dt)
         if entity.transform.parent == nil then
             entity.transform.position = vector.new(entity.physics.body:getPosition())
             entity.transform.rotation = entity.physics.body:getAngle()
+        else
+            entity.physics.body:setPosition(entity.transform:getAbsolutePosition():unpack())
+            entity.physics.body:setAngle(entity.transform:getAbsoluteRotation())
         end
     end
 end
