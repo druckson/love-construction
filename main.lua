@@ -35,6 +35,7 @@ end
 function love.update(dt)
     physics:update(dt)
     player:update(dt)
+    engine.messaging:flush()
 end
 
 function love.draw()
