@@ -1,10 +1,11 @@
 local Class = require "lib/hump/class"
 local Registry = require "lib/hump/signal"
 local Transform = require "utils/transform"
+local Messaging = require "utils/messaging"
 
 local Engine = Class{
     init = function(self)
-        self.registry = Registry()
+        self.messaging = Messaging()
         self.systems = {}
         self.entities = {}
     end

@@ -1,6 +1,7 @@
 local vector = require "lib/hump/vector"
 local Class = require "lib/hump/class"
 local color = require "utils/color"
+local shapes = require "utils/shapes"
 
 local function getColor(data)
     if data.space == "hsva" then
@@ -25,10 +26,10 @@ local Display = Class{
 
 function Display:setup(engine)
     local display = self
-    engine.registry:register("init_entity", function(...)
+    engine.messaging:register("init_entity", function(...)
         display:init_entity(...)
     end)
-    engine.registry:register("remove_entity", function(...)
+    engine.messaging:register("remove_entity", function(...)
         display:remove_entity(...)
     end)
 end
@@ -93,8 +94,10 @@ end
 
 function Display:setScreenSize(x, y)
     love.graphics.setMode(x, y, true, true, 3)
-    love.mouse.setVisible(false)
     self.screenSize = vector.new(x, y)
+    --love.graphics.setMode(400, 400, false, true, 3)
+    --self.screenSize = vector.new(400, 400)
+    love.mouse.setVisible(false)
 end
 
 function Display:moveCamera(x, y)
