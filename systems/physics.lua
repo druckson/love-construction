@@ -3,7 +3,6 @@ local vector = require "lib/hump/vector"
 local entity = require "entity"
 local interpolaters = require "utils/interpolaters"
 local Class = require "lib/hump/class"
-local shapes = require "utils/shapes"
 
 local Physics = Class{
     init = function(self, integrator)
@@ -55,17 +54,12 @@ function Physics:postSolve(a, b, collision)
 
 end
 
-local function CreateShape(data)
+local function CreateShape(data, x, y)
     local shape
-    --if data.type == "circle" then
-    --    return love.physics.newCircleShape(data.radius)
-    --elseif data.type == "square" then
-    --    return love.physics.newRectangleShape(data.sideLength/2, data.sideLength/2)
-    --end
-    
-    if shapes[data.type] then
-        print(shapes[data.type](data, 0, 0))
-        return shapes[data.type](data, 0, 0)
+    if data.type == "circle" then
+        return love.physics.newCircleShape(x, y, data.radius)
+    elseif data.type == "square" then
+        return love.physics.newRectangleShape(x, y, data.sideLength/2, data.sideLength/2, 0)
     end
     return nil
 end
@@ -84,7 +78,7 @@ function Physics:enable_physics(entity)
                                     position.y,
                                     entity.physics.data.bodyType)
     local  fixture = love.physics.newFixture(body, 
-                                             CreateShape(entity.physics.data.shape), 
+                                             CreateShape(entity.physics.data.shape, 0, 0), 
                                              entity.physics.data.density or 1)
     fixture:setUserData(entity)
 
@@ -107,11 +101,13 @@ function Physics:enable_physics(entity)
 end
 
 function Physics:disable_physics(entity)
-    entity.physics.fixture:destroy()
-    entity.physics.fixture = nil
+    if entity.physics then
+        entity.physics.fixture:destroy()
+        entity.physics.fixture = nil
 
-    entity.physics.body:destroy()
-    entity.physics.body = nil
+        entity.physics.body:destroy()
+        entity.physics.body = nil
+    end
 
     for key, value in pairs(self.entities) do
         if value == entity then
