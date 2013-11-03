@@ -33,7 +33,6 @@ function Construction:setup(engine)
     end)
 
     engine.messaging:register("connect", function(entity1, entity2)
-        print("Connect")
         construction:connect(entity1, entity2)
     end)
 
@@ -59,43 +58,58 @@ function Construction:remove_entity(entity)
     end
 end
 
+-- Move two join points to the same position, 
+function Construction:positionObjects(joint1, object1,
+                                      joint2, object2)
+    local locator1 = self.engine:createEntity({
+        transform = {
+            position = {0, 0},
+            rotation = 0
+        }
+    })
+
+    locator1.transform:setMatrix(joint1.transform:getAbsoluteMatrix())
+    object1.transform:setParent(locator1.transform)
+    
+    -- Move the join point (locator) to the second object
+    locator1.transform:setMatrix(joint2.transform:getAbsoluteMatrix())
+    
+    -- Line it up
+    locator1.transform:rotate(math.pi)
+    
+    -- Remove the temporary locator
+    object1.transform:removeParent()
+end
+
 function Construction:connect(o1, o2)
     assert(o1.construction and o2.construction,
            "Connect: wrong argument types (construction expected)")
 
-    print(o1.transform, o2.transform)
-
-    local locator = entity.new()
-
     -- Transform the first object in relation to the join point
-    local o2BaseAncestor = o2.transform:getBaseAncestor()
-    locator.transform:setMatrix(o2.transform:getAbsoluteMatrix())
-    o2BaseAncestor:setParent(locator.transform)
+    local o2BaseAncestor = o2.transform:getBaseAncestor().entity
+    local o1BaseAncestor = o1.transform:getBaseAncestor().entity
 
-    -- Move the join point (locator) to the second object
-    locator.transform:setMatrix(o1.transform:getAbsoluteMatrix())
+    if o1BaseAncestor ~= o2BaseAncestor then
+        self:positionObjects(o1, o1BaseAncestor, o2, o2BaseAncestor)
 
-    -- Line it up
-    locator.transform:rotate(math.pi)
+        o1.construction.connected = true
+        o2.construction.connected = true
 
-    -- Remove the temporary locator
-    o2BaseAncestor:removeParent()
+        --if o2BaseAncestor.entity.physics then
+        --    o2BaseAncestor.entity.physics.body:setPosition(o2BaseAncestor.entity.transform:getAbsolutePosition():unpack())
+        --    o2BaseAncestor.entity.physics.body:setAngle(o2BaseAncestor.entity.transform:getAbsoluteRotation())
+        --end
 
-    o1.construction.connected = true
-    o2.construction.connected = true
+        --o1BaseAncestor.entity.transform:setParent(locator.transform)
 
-    print("Connecting...")
+        --love.physics.newWeldJoint(o1BaseAncestor.entity.physics.body, 
+        --                          o2BaseAncestor.entity.physics.body,
+        --                          locator.transform.position.x, locator.transform.position.y, 
+        --                          false)
 
-    o2BaseAncestor.entity.physics.body:setPosition(o2BaseAncestor.entity.transform:getAbsolutePosition():unpack())
-    o2BaseAncestor.entity.physics.body:setAngle(o2BaseAncestor.entity.transform:getAbsoluteRotation())
-
-    local o1BaseAncestor = o1.transform:getBaseAncestor()
-    --o1BaseAncestor.entity.transform:setParent(locator.transform)
-
-    self.engine.systems['physics']:disable_physics(o1BaseAncestor.entity)
-    self.engine.systems['physics']:disable_physics(o2BaseAncestor.entity)
-
-    return locator
+        self.engine.systems['physics']:disable_physics(o1BaseAncestor)
+        self.engine.systems['physics']:disable_physics(o2BaseAncestor)
+    end
 end
 
 return Construction
