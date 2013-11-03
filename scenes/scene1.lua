@@ -20,8 +20,10 @@ local Scene = Class{
         local gr = iterateGR(0)
 
         self:createBlock(engine, {0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true)
-        for i = 0, 2 do
-            self:createBlock(engine, {20, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false)
+        for x = 1, 10 do
+            for y = 1, 10 do
+                self:createBlock(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false)
+            end
         end
     end
 }
@@ -44,17 +46,20 @@ function Scene:createJoinPoint(engine, parent, position, color, rotation)
             density = 1,
             shape = {
                 type = "circle",
-                radius = 0.1
+                segments = 7,
+                radius = 0.2
             }
         },
-        display = {
-            color = color,
-            shape = {
-                type = "triangle",
-                radius = 0.1
-            }
-        },
-        construction = {}
+        --display = {
+        --    color = color,
+        --    shape = {
+        --        type = "triangle",
+        --        radius = 0.1
+        --    }
+        --},
+        construction = {
+            type = "socket"
+        }
     }
     engine:createEntity(childBlock)
 end

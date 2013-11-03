@@ -23,16 +23,44 @@ local Scene = Class{
         self:createGlobe(engine, {    0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 500,  0, 1)
         self:createGlobe(engine, { 5000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 100, 20, 1, {0, -50})
         self:createGlobe(engine, {-5000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 100, 20, 1, {0,  50})
+
         self:createBlock(engine, { 5150, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true, {0, -45})
+        for x = 1, 5 do
+            for y = 0, 6 do
+                self:createBlock(engine, { 5150+x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false, {0, -45})
+            end
+        end
     end
 }
 
-function Scene:createJoinPoint(parent, color, x, y, r)
-    local childBlock = entity.new(parent)
-    childBlock.transform:setPosition(x, y)
-    childBlock.transform:setRotation(r)
-    --display:add(childBlock, "triangle", color, {radius=0.1})
-    construction:add(childBlock)
+function Scene:createJoinPoint(engine, parent, position, color, rotation)
+    local childBlock = {
+        transform = {
+            parent = parent,
+            position = position,
+            rotation = rotation
+        },
+        physics = {
+            bodyType = "dynamic",
+            density = 1,
+            shape = {
+                type = "circle",
+                segments = 7,
+                radius = 0.1
+            }
+        },
+        --display = {
+        --    color = color,
+        --    shape = {
+        --        type = "triangle",
+        --        radius = 0.1
+        --    }
+        --},
+        construction = {
+            type = "socket"
+        }
+    }
+    engine:createEntity(childBlock)
 end
 
 function Scene:createBlock(engine, position, color, rotation, density, isPlayer, velocity)
@@ -66,14 +94,14 @@ function Scene:createBlock(engine, position, color, rotation, density, isPlayer,
         mainBlock.player = {
             zoom = 1
         }
+        engine:createEntity(mainBlock)
     else
-        --self.createJoinPoint(mainBlock, {60, 00, 00, 255}, 0.5,  0, 0)
-        --self.createJoinPoint(mainBlock, {60, 60, 60, 255}, 0,  0.5, math.pi/2)
-        --self.createJoinPoint(mainBlock, {60, 60, 60, 255}, -0.5, 0, math.pi)
-        --self.createJoinPoint(mainBlock, {60, 60, 60, 255}, 0, -0.5, -math.pi/2)
+        local entity = engine:createEntity(mainBlock)
+        self:createJoinPoint(engine, entity.transform, { 0.5,    0}, {space="rgba", r=60, g=00, b=00, a=255}, 0)
+        self:createJoinPoint(engine, entity.transform, {   0,  0.5}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi/2)
+        self:createJoinPoint(engine, entity.transform, {-0.5,    0}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi)
+        self:createJoinPoint(engine, entity.transform, {   0, -0.5}, {space="rgba", r=60, g=60, b=60, a=255}, -math.pi/2)
     end
-
-    engine:createEntity(mainBlock)
 end
 
 function Scene:createGlobe(engine, position, color, radius, atmosphere_level, density, velocity)
@@ -88,6 +116,7 @@ function Scene:createGlobe(engine, position, color, radius, atmosphere_level, de
             velocity = {10, 0},
             shape = {
                 type = "circle",
+                segments = 100,
                 radius = radius
             },
             gravity = {
@@ -101,6 +130,7 @@ function Scene:createGlobe(engine, position, color, radius, atmosphere_level, de
         display = {
             shape = {
                 type = "circle",
+                segments = 100,
                 radius = radius
             },
             color = color
