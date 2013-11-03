@@ -38,6 +38,19 @@ function Matrix.translate(x, y)
     })
 end
 
+function Matrix:getRotation()
+    local position = self:getPosition()
+    local newPosition = (self * vector.new(0, 1)) - position
+    local rotation = -math.atan(newPosition.x / newPosition.y)
+    if newPosition.y < 0 then rotation = rotation + math.pi end
+
+    return rotation
+end
+
+function Matrix:getPosition()
+    return self * vector.new(0, 0)
+end
+
 function Matrix:getRow(y)
     return {self[1][y], self[2][y], self[3][y]}
 end

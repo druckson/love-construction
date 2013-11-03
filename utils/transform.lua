@@ -83,15 +83,21 @@ function Transform:setRotation(r)
     self.rotation = r
 end
 
+function Transform:getAbsolutePosition()
+    return self:getAbsoluteMatrix():getPosition()
+end
+
+function Transform:getAbsoluteRotation()
+    return self:getAbsoluteMatrix():getRotation()
+end
+
 function Transform:getMatrix()
     return matrix.translate(self.position.x, self.position.y) * matrix.rotate(self.rotation)
 end
 
 function Transform:setMatrix(matrix)
-    self.position = matrix * vector.new(0, 0)
-    local newPosition = (matrix * vector.new(0, 1)) - self.position
-    self:setRotation(-math.atan(newPosition.x / newPosition.y))
-    if newPosition.y < 0 then self:rotate(math.pi) end
+    self.position = matrix:getPosition()
+    self.rotation = matrix:getRotation()
 end
 
 function Transform:getAbsoluteMatrix()
