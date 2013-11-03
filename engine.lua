@@ -36,7 +36,17 @@ function Engine:createEntity(data)
 
     table.insert(self.entities, entity)
 
-    return entity
+    return setmetatable(entity, {
+        __tostring = function(entity)
+            local str = "Entity: "
+            for name, system in pairs(entity) do
+                if system.__tostring then
+                    str = str .. "\n\t" .. name .. ": " .. system:__tostring()
+                end
+            end
+            return str
+        end
+    })
 end
 
 function Engine:removeEntity(entity)
