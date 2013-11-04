@@ -11,21 +11,15 @@ local Scene = Class{
         local gr = iterateGR(0)
 
         self:createBlock(engine, {0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true)
-        for x = 1, 4 do
+        for x = 1, 5 do
             for y = 1, 5 do
-                self:createBlock(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false)
+                self:createTriangle(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false)
             end
         end
     end
 }
 
 function Scene:createJoinPoint(engine, parent, position, color, rotation)
-    --local childBlock = entity.new(parent)
-    --childBlock.transform:setPosition(x, y)
-    --childBlock.transform:setRotation(r)
-    ----display:add(childBlock, "triangle", color, {radius=0.1})
-    --self.construction:add(childBlock)
-
     local childBlock = {
         transform = {
             parent = parent,
@@ -39,16 +33,16 @@ function Scene:createJoinPoint(engine, parent, position, color, rotation)
             shape = {
                 type = "circle",
                 segments = 7,
-                radius = 0.2
+                radius = 0.1
             }
         },
-        --display = {
-        --    color = color,
-        --    shape = {
-        --        type = "circle",
-        --        radius = 0.1
-        --    }
-        --},
+        display = {
+            color = color,
+            shape = {
+                type = "triangle",
+                radius = 0.1
+            }
+        },
         construction = {
             type = "socket"
         }
@@ -56,11 +50,57 @@ function Scene:createJoinPoint(engine, parent, position, color, rotation)
     engine:createEntity(childBlock)
 end
 
+function Scene:createTriangle(engine, position, color, rotation, density, isPlayer, velocity)
+    local mainBlock = {
+        transform = {
+            position = position,
+            rotation = rotation 
+        },
+        physics = {
+            bodyType = "dynamic",
+            density = density,
+            shape = {
+                type = "triangle",
+                radius = 1
+            }
+        },
+        display = {
+            color = color,
+            shape = {
+                type = "triangle",
+                radius = 1
+            }
+        }
+    }
+    if isPlayer then
+        mainBlock.player = {
+            zoom = 1
+        }
+
+        engine:createEntity(mainBlock)
+
+    else
+        local entity = engine:createEntity(mainBlock)
+
+        local angle = 0
+        local point = vector.new(1, 0)
+
+        for i = 0, 3 do
+            self:createJoinPoint(engine, entity.transform,
+                                {point:rotated(angle):unpack()},
+                                {space="rgba", r=60, g=60, b=60, a=255},
+                                angle)
+            angle = angle + (2*math.pi/3)
+        end
+    end
+
+end
+
 function Scene:createBlock(engine, position, color, rotation, density, isPlayer, velocity)
     local mainBlock = {
         transform = {
             position = position,
-            rotation = 0
+            rotation = rotation 
         },
         physics = {
             bodyType = "dynamic",
