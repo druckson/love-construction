@@ -34,7 +34,9 @@ function Display:setup(engine)
 end
 
 function Display:init_entity(entity, data)
-    if data then
+    if data and 
+        data.display and
+        not data.display.dummy then
         entity.display = {
             shape = data.display.shape,
             color = getColor(data.display.color),
@@ -56,7 +58,7 @@ function Display:displayChildren(entity)
     love.graphics.translate(entity.transform.position.x, entity.transform.position.y)
     love.graphics.rotate(entity.transform.rotation)
 
-    if entity.display ~= nil then
+    if entity.display ~= nil then 
         love.graphics.setColor(entity.display.color)
 
         local properties = entity.display.properties
