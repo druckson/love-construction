@@ -1,5 +1,5 @@
 local vector = require "lib/hump/vector"
-local matrix = require "utils/matrix"
+local Matrix = require "utils/matrix"
 local Class = require "lib/hump/class"
 
 local Transform = {}
@@ -36,7 +36,7 @@ function Transform:setAbsolute()
 end
 
 function Transform:setRelative(parent)
-    local changeOfBasis = matrix.rotate(-parent.rotation) * matrix.translate(-parent.position.x, -parent.position.y)
+    local changeOfBasis = Matrix.rotate(-parent.rotation) * Matrix.translate(-parent.position.x, -parent.position.y)
     self:setMatrix(changeOfBasis * self:getAbsoluteMatrix())
 end
 
@@ -91,13 +91,28 @@ function Transform:getAbsoluteRotation()
     return self:getAbsoluteMatrix():getRotation()
 end
 
-function Transform:getMatrix()
-    return matrix.translate(self.position.x, self.position.y) * matrix.rotate(self.rotation)
+function Transform:getAbsoluteMatrix()
+    if (self.parent == nil) then
+        return self:getMatrix()
+    else
+        return self.parent:getAbsoluteMatrix() * self:getMatrix()
+    end
 end
 
-function Transform:setMatrix(matrix)
-    self.position = matrix:getPosition()
-    self.rotation = matrix:getRotation()
+function Transform:getLocalPosition()
+    return self:getLocalMatrix():getPosition()
+end
+
+function Transform:getLocalRotation()
+    return self:getLocalMatrix():getRotation()
+end
+
+function Transform:getLocalMatrix()
+    if (self.parent == nil) then
+        return Matrix.new()
+    else
+        return self.parent:getLocalMatrix() * self:getMatrix()
+    end
 end
 
 function Transform:getAbsoluteMatrix()
@@ -106,6 +121,15 @@ function Transform:getAbsoluteMatrix()
     else
         return self.parent:getAbsoluteMatrix() * self:getMatrix()
     end
+end
+
+function Transform:getMatrix()
+    return Matrix.translate(self.position.x, self.position.y) * Matrix.rotate(self.rotation)
+end
+
+function Transform:setMatrix(matrix)
+    self.position = matrix:getPosition()
+    self.rotation = matrix:getRotation()
 end
 
 function Transform:__tostring()
