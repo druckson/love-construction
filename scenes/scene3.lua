@@ -1,4 +1,13 @@
-local color = require "utils/color" local vector = require "lib/hump/vector" local entity = require "entity" local Class = require "lib/hump/class" function iterateGR(start) local current = start return function() current = (current + 1.61803398875) % 1 return current
+local color = require "utils/color"
+local vector = require "lib/hump/vector"
+local entity = require "entity"
+local Class = require "lib/hump/class"
+
+function iterateGR(start)
+    local current = start
+    return function()
+        current = (current + 1.61803398875) % 1
+        return current
     end
 end
 
@@ -10,14 +19,62 @@ local Scene = Class{
     init = function(self, engine)
         local gr = iterateGR(0)
 
-        self:createBlock(engine, {0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true)
+        
+        self:createBlock(engine, {0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, true)
         for x = 1, 5 do
             for y = 1, 5 do
-                self:createTriangle(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false)
+                if math.random() < 0.5 then
+                    self:createBlock(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, false)
+                else
+                    self:createTriangle(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, false)
+                end
             end
         end
+        --self:createBoundingBox(engine)
+
+        --self:createTriangle(engine, {0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true)
+        --for x = 1, 1 do
+        --    for y = 1, 1 do
+        --        self:createTriangle(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false)
+        --    end
+        --end
     end
 }
+
+function Scene:createBoundingBox(engine)
+    self:createStaticBox(engine, {  0, -10}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0, 20,  1)
+    self:createStaticBox(engine, {  0,  10}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0, 20,  1)
+    self:createStaticBox(engine, {-10,   0}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0,  1, 20)
+    self:createStaticBox(engine, { 10,   0}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0,  1, 20)
+end
+
+function Scene:createStaticBox(engine, position, color, rotation, width, height)
+    local mainBlock = {
+        transform = {
+            position = position,
+            rotation = rotation 
+        },
+        physics = {
+            bodyType = "static",
+            density = density,
+            shape = {
+                type = "rectangle",
+                width = width,
+                height = height
+            }
+        },
+        display = {
+            color = color,
+            shape = {
+                type = "rectangle",
+                width = width,
+                height = height
+            }
+        }
+    }
+
+    engine:createEntity(mainBlock)
+end
 
 function Scene:createJoinPoint(engine, parent, position, color, rotation)
     local childBlock = {
@@ -36,13 +93,13 @@ function Scene:createJoinPoint(engine, parent, position, color, rotation)
                 radius = 0.1
             }
         },
-        display = {
-            color = color,
-            shape = {
-                type = "triangle",
-                radius = 0.1
-            }
-        },
+        --display = {
+        --    color = color,
+        --    shape = {
+        --        type = "triangle",
+        --        radius = 0.1
+        --    }
+        --},
         construction = {
             type = "socket"
         }
