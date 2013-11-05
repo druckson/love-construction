@@ -47,6 +47,11 @@ function Matrix:getRotation()
     return rotation
 end
 
+function Matrix:getScale()
+    local newPosition = self * vector.new(0, 1)
+    return newPosition:len()
+end
+
 function Matrix:getPosition()
     return self * vector.new(0, 0)
 end
