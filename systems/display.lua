@@ -62,7 +62,7 @@ function Display:displayChildren(entity)
         love.graphics.setColor(entity.display.color)
 
         local properties = entity.display.properties
-        if entity.display.shape.type == "rect" then
+        if entity.display.shape.type == "rectangle" then
             local width  = entity.display.shape.width
             local height = entity.display.shape.height
             love.graphics.rectangle("fill", -width/2, -height/2, width, height)
@@ -72,15 +72,15 @@ function Display:displayChildren(entity)
         elseif entity.display.shape.type == "circle" then
             love.graphics.circle("fill", 0, 0, entity.display.shape.radius)
         elseif entity.display.shape.type == "triangle" then
-            local radius = entity.display.shape.radius
-            local points = {}
-            love.graphics.polygon("fill", {
-                math.cos(0)*radius, 
-                math.sin(0)*radius,
-                math.cos(2*math.pi/3)*radius, 
-                math.sin(2*math.pi/3)*radius,
-                math.cos(4*math.pi/3)*radius, 
-                math.sin(4*math.pi/3)*radius})
+            local angle = 0
+            local point = vector.new(entity.display.shape.radius, 0)
+            local coords = {}
+
+            for i = 0, 2 do
+                table.insert(coords, point:rotated(i*2*math.pi/3).x)
+                table.insert(coords, point:rotated(i*2*math.pi/3).y)
+            end
+            love.graphics.polygon("fill", coords)
         end
     end
 
