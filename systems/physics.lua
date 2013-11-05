@@ -1,5 +1,6 @@
 local transform = require "utils/transform"
 local vector = require "lib/hump/vector"
+local Matrix = require "utils/matrix"
 local entity = require "entity"
 local interpolaters = require "utils/interpolaters"
 local Class = require "lib/hump/class"
@@ -11,7 +12,8 @@ local Physics = Class{
 
         self.integrator = integrator
         self.world = love.physics.newWorld(0, 0, true)
-        --love.physics.setMeter(1)
+        --self.world:setGravity(0, -9.8)
+        love.physics.setMeter(1)
 
         self.world:setCallbacks(function(...)
             self:beginContact(...)
@@ -55,9 +57,9 @@ function Physics:postSolve(a, b, collision)
 
 end
 
-function Physics:createShape(x, y, data)
+function Physics:createShape(data, m)
     if shapes[data.type] then
-        return shapes[data.type](x, y, data)
+        return shapes[data.type](data, m)
     end
     return nil
 end
@@ -97,14 +99,14 @@ function Physics:enable_physics(entity, recurse)
     end 
 
     if entity.physics.data.shape then
-        local x, y = 0, 0
+        local m = Matrix.new()
         if entity.transform.parent then
-            x, y = entity.transform:getLocalPosition():unpack()
+            m = entity.transform:getLocalMatrix()
         end
 
         local  fixture = love.physics.newFixture(body, 
-                                                 self:createShape(x, y, entity.physics.data.shape), 
-                                                 entity.physics.data.density or 1)
+                              self:createShape(entity.physics.data.shape, m), 
+                              entity.physics.data.density or 1)
         fixture:setUserData(entity)
 
         if entity.physics.data.sensor then
