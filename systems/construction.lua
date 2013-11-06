@@ -20,6 +20,8 @@ function Construction:setup(engine)
 
         if  entity1.construction and 
             entity2.construction and
+            entity1.construction.type == "socket" and
+            entity2.construction.type == "socket" and
             not entity1.construction.connected and 
             not entity2.construction.connected then
             engine.messaging:emit("connect", entity1, entity2)
@@ -132,6 +134,8 @@ function Construction:computeCenterOfMass(objects)
     return centerOfMass
 end
 
+
+local groupIndex = 1
 function Construction:joinObjects(objects)
     local centerOfMass = self:computeCenterOfMass(objects)
 
@@ -145,7 +149,8 @@ function Construction:joinObjects(objects)
             rotation = 0
         },
         physics = {
-            bodyType = "dynamic"
+            bodyType = "dynamic",
+            groupIndex = groupIndex
         },
         display = {
             dummy = true
@@ -154,6 +159,8 @@ function Construction:joinObjects(objects)
             type = "composite"
         }
     })
+
+    groupIndex = groupIndex + 1
 
     for _, o in pairs(objects) do
         o.transform:setParent(parent.transform)
