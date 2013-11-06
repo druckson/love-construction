@@ -30,7 +30,7 @@ local Scene = Class{
                 end
             end
         end
-        --self:createBoundingBox(engine)
+        self:createBoundingBox(engine, 50)
 
         --self:createTriangle(engine, {0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true)
         --for x = 1, 1 do
@@ -41,11 +41,11 @@ local Scene = Class{
     end
 }
 
-function Scene:createBoundingBox(engine)
-    self:createStaticBox(engine, {  0, -10}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0, 20,  1)
-    self:createStaticBox(engine, {  0,  10}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0, 20,  1)
-    self:createStaticBox(engine, {-10,   0}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0,  1, 20)
-    self:createStaticBox(engine, { 10,   0}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0,  1, 20)
+function Scene:createBoundingBox(engine, l)
+    self:createStaticBox(engine, {  0, -l/2}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0, l, 1)
+    self:createStaticBox(engine, {  0,  l/2}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0, l, 1)
+    self:createStaticBox(engine, {-l/2,   0}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0, 1, l)
+    self:createStaticBox(engine, { l/2,   0}, {space="hsva", h=0, s=0.7, v=0.7, a=1.0},  0, 1, l)
 end
 
 function Scene:createStaticBox(engine, position, color, rotation, width, height)
@@ -90,7 +90,7 @@ function Scene:createJoinPoint(engine, parent, position, color, rotation)
             shape = {
                 type = "circle",
                 segments = 7,
-                radius = 0.1
+                radius = 0.03
             }
         },
         --display = {
