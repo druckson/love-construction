@@ -39,10 +39,16 @@ function Player:update(dt)
         local moveForward = 0
         local moveSideways = 0
 
+        local turnSpeed = 1
+        local turn = 0
+
         if love.keyboard.isDown("w") then moveForward = moveForward - moveSpeed end
         if love.keyboard.isDown("s") then moveForward = moveForward + moveSpeed end
         if love.keyboard.isDown("d") then moveSideways = moveSideways - moveSpeed end
         if love.keyboard.isDown("a") then moveSideways = moveSideways + moveSpeed end
+
+        if love.keyboard.isDown("q") then turn = turn - turnSpeed end
+        if love.keyboard.isDown("e") then turn = turn + turnSpeed end
 
         local rotation = love.mouse.getX() * 0.005
         if rotation > math.pi*2 then
@@ -68,6 +74,7 @@ function Player:update(dt)
                          vector.new(-moveSideways, moveForward)
 
         self.entity.physics.body:applyForce(velocity:unpack())
+        self.entity.physics.body:applyTorque(turn)
         --self.entity.physics.body:applyTorque(self.entity.player.cameraAngle - rotation)
         self.entity.player.zoom = math.max(0.01, math.min(1000, self.entity.player.zoom + zoom))
 
