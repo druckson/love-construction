@@ -35,7 +35,7 @@ end
 
 function Player:update(dt)
     if self.entity ~= nil then
-        local moveSpeed = 5
+        local moveSpeed = 20
         local moveForward = 0
         local moveSideways = 0
 
@@ -59,7 +59,7 @@ function Player:update(dt)
         --self.entity.player.cameraAngle = math.pi + velocity:angleTo()
         self.entity.player.cameraAngle = rotation
 
-        local zoomSpeed = dt*1
+        local zoomSpeed = dt*10
         local zoom = 0
         if love.keyboard.isDown("x") then zoom = zoom + zoomSpeed end
         if love.keyboard.isDown("c") then zoom = zoom - zoomSpeed end
