@@ -18,7 +18,8 @@ function Construction:setup(engine)
         local entity1 = a:getUserData()
         local entity2 = b:getUserData()
 
-        if  entity1.construction and 
+        if  collision:isTouching() and
+            entity1.construction and 
             entity2.construction and
             entity1.construction.type == "socket" and
             entity2.construction.type == "socket" and
@@ -79,6 +80,9 @@ function Construction:positionObjects(joint1, object1,
     object1.transform:removeParent()
 
     self.engine:removeEntity(locator1)
+
+    self.engine.systems['physics']:matchTransform(object1)
+    self.engine.systems['physics']:matchTransform(object2)
 end
 
 function Construction:getObjects(object)
@@ -167,6 +171,7 @@ function Construction:joinObjects(objects)
     end
 
     self.engine.systems['physics']:enable_physics(parent, true)
+    return parent
 end
 
 function Construction:connect(o1, o2)
@@ -174,8 +179,8 @@ function Construction:connect(o1, o2)
            "Connect: wrong argument types (construction expected)")
 
     -- Transform the first object in relation to the join point
-    local o2BaseAncestor = o2.transform:getBaseAncestor().entity
     local o1BaseAncestor = o1.transform:getBaseAncestor().entity
+    local o2BaseAncestor = o2.transform:getBaseAncestor().entity
 
     if  o1BaseAncestor ~= o2BaseAncestor and
         (not o1.construction.connected) and 
@@ -187,8 +192,21 @@ function Construction:connect(o1, o2)
             self:positionObjects(o1, o1BaseAncestor, o2, o2BaseAncestor)
         end
 
+        local x1, y1, mass1 = o1BaseAncestor.physics.body:getMassData()
+        local force1 = vector.new(o1BaseAncestor.physics.body:getLinearVelocity()) * mass1
+        local torque1 = o1BaseAncestor.physics.body:getAngularVelocity() * mass1
+
+        local x2, y2, mass2 = o2BaseAncestor.physics.body:getMassData()
+        local force2 = vector.new(o2BaseAncestor.physics.body:getLinearVelocity()) * mass1
+        local torque2 = o2BaseAncestor.physics.body:getAngularVelocity() * mass2
+
         local objects = self:getAllObjects(o1BaseAncestor, o2BaseAncestor)
-        self:joinObjects(objects)
+        local newObject = self:joinObjects(objects)
+
+        local newMass = newObject.physics.body:getMass()
+
+        newObject.physics.body:setLinearVelocity(((force1 + force2) / newMass):unpack())
+        newObject.physics.body:setAngularVelocity((torque1 + torque2) / newMass)
 
         o1.construction.connected = true
         o2.construction.connected = true

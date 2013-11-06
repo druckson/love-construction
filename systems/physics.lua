@@ -166,6 +166,11 @@ function Physics:remove_entity(entity)
     end
 end
 
+function Physics:matchTransform(entity)
+    entity.physics.body:setPosition(entity.transform:getAbsolutePosition():unpack())
+    entity.physics.body:setAngle(entity.transform:getAbsoluteRotation())
+end
+
 function Physics:update(dt)
     local physics = self
     --for _, entity in pairs(self.entities) do
@@ -216,9 +221,6 @@ function Physics:update(dt)
         if entity.transform.parent == nil then
             entity.transform.position = vector.new(entity.physics.body:getPosition())
             entity.transform.rotation = entity.physics.body:getAngle()
-        else
-            --entity.physics.body:setPosition(entity.transform:getAbsolutePosition():unpack())
-            --entity.physics.body:setAngle(entity.transform:getAbsoluteRotation())
         end
     end
 end
