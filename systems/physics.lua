@@ -73,15 +73,18 @@ function Physics:init_entity(entity, data)
 end
 
 function Physics:enable_physics(entity, recurse)
+    local groupIndex
     local body
 
     if entity.transform.parent then
         body = entity.transform:getBaseAncestor().entity.physics.body
+        groupIndex = entity.transform:getBaseAncestor().entity.physics.data.groupIndex
     else
         body = love.physics.newBody(self.world,
                                     entity.transform.position.x,
                                     entity.transform.position.y,
                                     entity.physics.data.bodyType)
+        --body:setBullet(true)
         entity.physics.body = body
         body:setAngle(-entity.transform:getAbsoluteRotation())
 
@@ -99,21 +102,30 @@ function Physics:enable_physics(entity, recurse)
     end 
 
     if entity.physics.data.shape then
-        local m = Matrix.new()
-        if entity.transform.parent then
-            m = entity.transform:getLocalMatrix()
+        if not (entity.construction and 
+            entity.construction.type == "socket" and 
+            entity.construction.connected) then
+
+            local m = Matrix.new()
+            if entity.transform.parent then
+                m = entity.transform:getLocalMatrix()
+            end
+            local shape = self:createShape(entity.physics.data.shape, m)
+
+            local  fixture = love.physics.newFixture(body, shape,
+                                  entity.physics.data.density or 1)
+            fixture:setUserData(entity)
+
+            if groupIndex then
+                fixture:setGroupIndex(groupIndex)
+            end
+
+            if entity.physics.data.sensor then
+                fixture:setSensor(true)
+            end
+
+            entity.physics.fixture = fixture
         end
-
-        local  fixture = love.physics.newFixture(body, 
-                              self:createShape(entity.physics.data.shape, m), 
-                              entity.physics.data.density or 1)
-        fixture:setUserData(entity)
-
-        if entity.physics.data.sensor then
-            fixture:setSensor(true)
-        end
-
-        entity.physics.fixture = fixture
     end
 
     if recurse then
@@ -156,46 +168,46 @@ end
 
 function Physics:update(dt)
     local physics = self
-    for _, entity in pairs(self.entities) do
-        if entity.transform.parent == nil then
-            if #physics.gravityObjects > 0 then
-                local position = entity.transform.position
-                local velocity = vector.new(entity.physics.body:getLinearVelocity())
-                local state = vector.new(position, velocity)
-                _, state = self.integrator(0, dt, state, function(_, state)
-                    local position = state.x
-                    local velocity = state.y
-                    local acceleration = vector.new(0, 0)
+    --for _, entity in pairs(self.entities) do
+    --    if entity.transform.parent == nil then
+    --        if #physics.gravityObjects > 0 then
+    --            local position = entity.transform.position
+    --            local velocity = vector.new(entity.physics.body:getLinearVelocity())
+    --            local state = vector.new(position, velocity)
+    --            _, state = self.integrator(0, dt, state, function(_, state)
+    --                local position = state.x
+    --                local velocity = state.y
+    --                local acceleration = vector.new(0, 0)
 
-                    for _, gravityObject in pairs(physics.gravityObjects) do
-                        if entity ~= gravityObject then
-                            local gravityVector = 
-                                (gravityObject.transform.position - position)
-                            local gravityDist2 = gravityVector:len2()
-                            local mass = gravityObject.physics.body:getMass()
-                            acceleration = acceleration + (gravityVector * (mass / gravityDist2))
+    --                for _, gravityObject in pairs(physics.gravityObjects) do
+    --                    if entity ~= gravityObject then
+    --                        local gravityVector = 
+    --                            (gravityObject.transform.position - position)
+    --                        local gravityDist2 = gravityVector:len2()
+    --                        local mass = gravityObject.physics.body:getMass()
+    --                        acceleration = acceleration + (gravityVector * (mass / gravityDist2))
 
-                            local radius = gravityObject.physics.gravity.atmosphere.radius
-                            local radius2 = radius * radius
-                            local atmosphereRadius = gravityObject.physics.gravity.atmosphere.level
-                            local atmosphereRadius2 = atmosphereRadius * atmosphereRadius
+    --                        local radius = gravityObject.physics.gravity.atmosphere.radius
+    --                        local radius2 = radius * radius
+    --                        local atmosphereRadius = gravityObject.physics.gravity.atmosphere.level
+    --                        local atmosphereRadius2 = atmosphereRadius * atmosphereRadius
 
-                            local drag = invlerp(atmosphereRadius2, radius2, gravityDist2) * gravityObject.physics.gravity.atmosphere.density
+    --                        local drag = invlerp(atmosphereRadius2, radius2, gravityDist2) * gravityObject.physics.gravity.atmosphere.density
 
-                            local localVelocity = velocity - vector.new(gravityObject.physics.body:getLinearVelocity())
+    --                        local localVelocity = velocity - vector.new(gravityObject.physics.body:getLinearVelocity())
 
-                            if gravityDist2 < atmosphereRadius2 then
-                                acceleration = acceleration - (localVelocity * drag)
-                            end
-                        end
-                    end
+    --                        if gravityDist2 < atmosphereRadius2 then
+    --                            acceleration = acceleration - (localVelocity * drag)
+    --                        end
+    --                    end
+    --                end
 
-                    return vector.new(velocity, acceleration)
-                end)
-                entity.physics.body:setLinearVelocity(state.y:unpack())
-            end
-        end
-    end
+    --                return vector.new(velocity, acceleration)
+    --            end)
+    --            entity.physics.body:setLinearVelocity(state.y:unpack())
+    --        end
+    --    end
+    --end
 
     self.world:update(dt)
 
