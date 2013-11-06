@@ -23,7 +23,7 @@ local Scene = Class{
         self:createBlock(engine, {0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, true)
         for x = 1, 5 do
             for y = 1, 5 do
-                if math.random() < 0.5 then
+                if true then --math.random() < 0.5 then
                     self:createBlock(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, false)
                 else
                     self:createTriangle(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, false)

@@ -20,14 +20,14 @@ local Scene = Class{
     init = function(self, engine)
         local gr = iterateGR(0)
 
-        self:createGlobe(engine, {    0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 500,  0, 1)
-        self:createGlobe(engine, { 5000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 100, 20, 1, {0, -50})
-        self:createGlobe(engine, {-5000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 100, 20, 1, {0,  50})
+        self:createGlobe(engine, {    0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 300,  0, 0.1)
+        self:createGlobe(engine, { 10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  50, 20, 0.1, {0, -100})
+        self:createGlobe(engine, {-10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  50, 20, 0.1, {0,  100})
 
-        self:createBlock(engine, { 5150, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true, {0, -45})
-        for x = 1, 5 do
-            for y = 0, 6 do
-                self:createBlock(engine, { 5150+x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false, {0, -45})
+        self:createBlock(engine, { 10150, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true, {0, -45})
+        for x = 1, 2 do
+            for y = 0, 1 do
+                self:createBlock(engine, { 10150+x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false, {0, -45})
             end
         end
     end
