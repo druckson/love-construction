@@ -31,16 +31,16 @@ return {
 
         local x, y
 
-        x, y = matrix * vector.new(w/2, h/2):unpack()
+        x, y = (matrix * vector.new(w/2, h/2)):unpack()
         table.insert(coords, x)
         table.insert(coords, y)
-        x, y = matrix * vector.new(w/2, -h/2):unpack()
+        x, y = (matrix * vector.new(w/2, -h/2)):unpack()
         table.insert(coords, x)
         table.insert(coords, y)
-        x, y = matrix * vector.new(-w/2, -h/2):unpack()
+        x, y = (matrix * vector.new(-w/2, -h/2)):unpack()
         table.insert(coords, x)
         table.insert(coords, y)
-        x, y = matrix * vector.new(-w/2, h/2):unpack()
+        x, y = (matrix * vector.new(-w/2, h/2)):unpack()
         table.insert(coords, x)
         table.insert(coords, y)
 
