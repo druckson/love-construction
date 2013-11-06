@@ -1,3 +1,36 @@
+local Class = require "lib/hump/class"
+
+local Electricity = Class{
+    init = function(self)
+        self.entities = {}
+    end
+}
+
+function Electricity:setup(engine)
+    local electricity = self
+
+    engine.messaging:register("init_entity", function(...)
+        electricity:init_entity(...)
+    end)
+
+    engine.messaging:register("remove_entity", function(...)
+        electricity:remove_entity(...)
+    end)
+
+    engine.messaging:register("connect", function(...)
+        electricity:connect(...)
+    end)
+end
+
+function Electricity:init_entity(entity, data)
+    table.insert(self.entities, entity)
+end
+
+function Electricity:remove_entity(entity, data)
+
+end
+
+
 local Electricity = {
     objects = {},
     circuits = {}
