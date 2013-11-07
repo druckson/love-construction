@@ -73,17 +73,19 @@ function Player:update(dt)
         local velocity = matrix.rotate(self.entity.player.cameraAngle) *
                          vector.new(-moveSideways, moveForward)
 
-        self.entity.physics.body:applyForce(velocity:unpack())
-        self.entity.physics.body:applyTorque(turn)
+        local parent = self.entity.transform:getBaseAncestor().entity
+
+        parent.physics.body:applyForce(velocity:unpack())
+        parent.physics.body:applyTorque(turn)
         --self.entity.physics.body:applyTorque(self.entity.player.cameraAngle - rotation)
         self.entity.player.zoom = math.max(0.01, math.min(1000, self.entity.player.zoom + zoom))
 
-        self.display:moveCamera(self.entity.transform.position.x,
-                                self.entity.transform.position.y)
+        self.display:moveCamera(parent.transform.position.x,
+                                parent.transform.position.y)
 
         self.display:rotateCamera(self.entity.player.cameraAngle)
         self.display:zoomCamera(self.entity.player.zoom)
-        self.display:setSpeedometer(vector.new(self.entity.physics.body:getLinearVelocity()):len())
+        self.display:setSpeedometer(vector.new(parent.physics.body:getLinearVelocity()):len())
     end
 end
 
