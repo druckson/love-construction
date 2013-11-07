@@ -127,7 +127,8 @@ function Construction:computeCenterOfMass(objects)
         if data.shape and shapes[data.shape.type] then
             local shape = shapes[data.shape.type](data.shape, Matrix.new())
             local x, y, mass = shape:computeMass(data.density)
-            local pos = vector.new(o.transform.position.x + x, o.transform.position.y + y)
+            --local pos = vector.new(o.transform.position.x + x, o.transform.position.y + y)
+            local pos = o.transform:getAbsoluteMatrix() * vector.new(x, y)
 
             -- Moving average
             local newTotalMass = totalMass + mass
