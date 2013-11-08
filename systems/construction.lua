@@ -49,9 +49,8 @@ function Construction:init_entity(entity, data)
 end
 
 function Construction:remove_entity(entity)
-    for key, value in self.entities do
+    for key, value in pairs(self.entities) do
         if value == entity then
-            table.remove(entity, "construction")
             table.remove(self.entities, key)
         end
     end
@@ -127,7 +126,6 @@ function Construction:computeCenterOfMass(objects)
         if data.shape and shapes[data.shape.type] then
             local shape = shapes[data.shape.type](data.shape, Matrix.new())
             local x, y, mass = shape:computeMass(data.density)
-            --local pos = vector.new(o.transform.position.x + x, o.transform.position.y + y)
             local pos = o.transform:getAbsoluteMatrix() * vector.new(x, y)
 
             -- Moving average
@@ -203,6 +201,14 @@ function Construction:connect(o1, o2)
 
         local objects = self:getAllObjects(o1BaseAncestor, o2BaseAncestor)
         local newObject = self:joinObjects(objects)
+
+        if not o1BaseAncestor.transform.parent then
+            self.engine:removeEntity(o1BaseAncestor)
+        end
+
+        if not o2BaseAncestor.transform.parent then
+            self.engine:removeEntity(o2BaseAncestor)
+        end
 
         local newMass = newObject.physics.body:getMass()
 
