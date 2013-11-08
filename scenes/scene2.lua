@@ -20,14 +20,16 @@ local Scene = Class{
     init = function(self, engine)
         local gr = iterateGR(0)
 
-        self:createGlobe(engine, {    0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 300,  0, 0.1)
-        self:createGlobe(engine, { 10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  50, 20, 0.1, {0, -100})
-        self:createGlobe(engine, {-10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  50, 20, 0.1, {0,  100})
+        --self:createGlobe(engine, {    0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  2000,  0, 1)
+        self:createGlobe(engine, { 10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  500, 20, 1)--, {0, -100})
+        --self:createGlobe(engine, {-10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  500, 20, 1)--, {0,  100})
 
-        self:createBlock(engine, { 10150, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true, {0, -45})
-        for x = 1, 2 do
-            for y = 0, 1 do
-                self:createBlock(engine, { 10150+x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false, {0, -45})
+        local blockVel = {0, 50}
+
+        self:createBlock(engine, { 10850, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true, blockVel)
+        for x = 1, 6 do
+            for y = 0, 4 do
+                self:createBlock(engine, { 10850+x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false, blockVel)
             end
         end
     end
@@ -94,14 +96,13 @@ function Scene:createBlock(engine, position, color, rotation, density, isPlayer,
         mainBlock.player = {
             zoom = 1
         }
-        engine:createEntity(mainBlock)
-    else
-        local entity = engine:createEntity(mainBlock)
-        self:createJoinPoint(engine, entity.transform, { 0.5,    0}, {space="rgba", r=60, g=00, b=00, a=255}, 0)
-        self:createJoinPoint(engine, entity.transform, {   0,  0.5}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi/2)
-        self:createJoinPoint(engine, entity.transform, {-0.5,    0}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi)
-        self:createJoinPoint(engine, entity.transform, {   0, -0.5}, {space="rgba", r=60, g=60, b=60, a=255}, -math.pi/2)
     end
+
+    local entity = engine:createEntity(mainBlock)
+    self:createJoinPoint(engine, entity.transform, { 0.5,    0}, {space="rgba", r=60, g=00, b=00, a=255}, 0)
+    self:createJoinPoint(engine, entity.transform, {   0,  0.5}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi/2)
+    self:createJoinPoint(engine, entity.transform, {-0.5,    0}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi)
+    self:createJoinPoint(engine, entity.transform, {   0, -0.5}, {space="rgba", r=60, g=60, b=60, a=255}, -math.pi/2)
 end
 
 function Scene:createGlobe(engine, position, color, radius, atmosphere_level, density, velocity)
@@ -113,7 +114,6 @@ function Scene:createGlobe(engine, position, color, radius, atmosphere_level, de
         physics = {
             bodyType = "dynamic",
             density = density,
-            velocity = {10, 0},
             shape = {
                 type = "circle",
                 segments = 100,
@@ -137,7 +137,7 @@ function Scene:createGlobe(engine, position, color, radius, atmosphere_level, de
         }
     }
 
-    if velocity ~= nil then
+    if velocity then
         globe.physics.velocity = velocity
     end
 

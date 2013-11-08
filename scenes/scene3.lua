@@ -23,7 +23,7 @@ local Scene = Class{
         self:createBlock(engine, {0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, true)
         for x = 1, 5 do
             for y = 1, 5 do
-                if true then --math.random() < 0.5 then
+                if false then --math.random() < 0.5 then
                     self:createBlock(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, false)
                 else
                     self:createTriangle(engine, {x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, 0, 1, false)
@@ -180,19 +180,21 @@ function Scene:createBlock(engine, position, color, rotation, density, isPlayer,
         mainBlock.physics.velocity = velocity
     end
 
+    local entity
     if isPlayer then
         mainBlock.player = {
             zoom = 1
         }
 
-        engine:createEntity(mainBlock)
+        entity = engine:createEntity(mainBlock)
     else
-        local entity = engine:createEntity(mainBlock)
-        self:createJoinPoint(engine, entity.transform, { 0.5,    0}, {space="rgba", r=60, g=00, b=00, a=255}, 0)
-        self:createJoinPoint(engine, entity.transform, {   0,  0.5}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi/2)
-        self:createJoinPoint(engine, entity.transform, {-0.5,    0}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi)
-        self:createJoinPoint(engine, entity.transform, {   0, -0.5}, {space="rgba", r=60, g=60, b=60, a=255}, -math.pi/2)
+        entity = engine:createEntity(mainBlock)
     end
+
+    self:createJoinPoint(engine, entity.transform, { 0.5,    0}, {space="rgba", r=60, g=00, b=00, a=255}, 0)
+    self:createJoinPoint(engine, entity.transform, {   0,  0.5}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi/2)
+    self:createJoinPoint(engine, entity.transform, {-0.5,    0}, {space="rgba", r=60, g=60, b=60, a=255}, math.pi)
+    self:createJoinPoint(engine, entity.transform, {   0, -0.5}, {space="rgba", r=60, g=60, b=60, a=255}, -math.pi/2)
 end
 
 return Scene
