@@ -27,6 +27,37 @@ local Physics = Class{
 
         self.entities = {}
         self.gravityObjects = {}
+
+        self.gravity = function(_, state, entity)
+            local position = state.x
+            local velocity = state.y
+            local acceleration = vector.new(0, 0)
+            
+            for _, gravityObject in pairs(physics.gravityObjects) do
+                if gravityObject ~= entity then
+                    local gravityVector = (gravityObject.transform.position - position)
+                    local gravityDist2 = gravityVector:len2()
+                    local mass = gravityObject.physics.body:getMass()
+                    acceleration = acceleration + (gravityVector:normalized() * (mass / gravityDist2))
+            
+                    -- Add atmosphere
+                    --local radius = gravityObject.physics.gravity.atmosphere.radius
+                    --local radius2 = radius * radius
+                    --local atmosphereRadius = gravityObject.physics.gravity.atmosphere.level
+                    --local atmosphereRadius2 = atmosphereRadius * atmosphereRadius
+            
+                    --local drag = invlerp(atmosphereRadius2, radius2, gravityDist2) * gravityObject.physics.gravity.atmosphere.density
+            
+                    --local localVelocity = velocity - vector.new(gravityObject.physics.body:getLinearVelocity())
+            
+                    --if gravityDist2 < atmosphereRadius2 then
+                    --    acceleration = acceleration - (localVelocity * drag)
+                    --end
+                end
+            end
+            
+            return vector.new(velocity, acceleration)
+        end
     end
 }
 
@@ -84,7 +115,7 @@ function Physics:enable_physics(entity, recurse)
                                     entity.transform.position.x,
                                     entity.transform.position.y,
                                     entity.physics.data.bodyType)
-        --body:setBullet(true)
+        body:setBullet(true)
         entity.physics.body = body
         body:setAngle(-entity.transform:getAbsoluteRotation())
 
@@ -120,7 +151,8 @@ function Physics:enable_physics(entity, recurse)
                 fixture:setGroupIndex(groupIndex)
             end
 
-            if entity.physics.data.sensor then
+            if entity.construction and
+                entity.construction.type == "socket" then
                 fixture:setSensor(true)
             end
 
@@ -147,21 +179,16 @@ function Physics:disable_physics(entity)
             entity.physics.body = nil
         end
     end
-
-    for key, value in pairs(self.entities) do
-        if value == entity then
-            table.remove(self.entities, key)
-        end
-    end
 end
 
 function Physics:remove_entity(entity)
     for key, value in pairs(self.entities) do
         if value == entity then
-            entity.physics.fixture:destroy()
-            entity.physics.body:destroy()
-            --entity.physics = nil
+            self:disable_physics(entity)
+            entity.physics = nil
+            entity.test = "Hello"
             table.remove(self.entities, key)
+            self.entities[key] = nil
         end
     end
 end
@@ -173,49 +200,21 @@ end
 
 function Physics:update(dt)
     local physics = self
-    --for _, entity in pairs(self.entities) do
-    --    if entity.transform.parent == nil then
-    --        if #physics.gravityObjects > 0 then
-    --            local position = entity.transform.position
-    --            local velocity = vector.new(entity.physics.body:getLinearVelocity())
-    --            local state = vector.new(position, velocity)
-    --            _, state = self.integrator(0, dt, state, function(_, state)
-    --                local position = state.x
-    --                local velocity = state.y
-    --                local acceleration = vector.new(0, 0)
-
-    --                for _, gravityObject in pairs(physics.gravityObjects) do
-    --                    if entity ~= gravityObject then
-    --                        local gravityVector = 
-    --                            (gravityObject.transform.position - position)
-    --                        local gravityDist2 = gravityVector:len2()
-    --                        local mass = gravityObject.physics.body:getMass()
-    --                        acceleration = acceleration + (gravityVector * (mass / gravityDist2))
-
-    --                        local radius = gravityObject.physics.gravity.atmosphere.radius
-    --                        local radius2 = radius * radius
-    --                        local atmosphereRadius = gravityObject.physics.gravity.atmosphere.level
-    --                        local atmosphereRadius2 = atmosphereRadius * atmosphereRadius
-
-    --                        local drag = invlerp(atmosphereRadius2, radius2, gravityDist2) * gravityObject.physics.gravity.atmosphere.density
-
-    --                        local localVelocity = velocity - vector.new(gravityObject.physics.body:getLinearVelocity())
-
-    --                        if gravityDist2 < atmosphereRadius2 then
-    --                            acceleration = acceleration - (localVelocity * drag)
-    --                        end
-    --                    end
-    --                end
-
-    --                return vector.new(velocity, acceleration)
-    --            end)
-    --            entity.physics.body:setLinearVelocity(state.y:unpack())
-    --        end
-    --    end
-    --end
+    local bodyCount = 0
+    for _, entity in pairs(self.entities) do
+        if entity.transform.parent == nil then
+            bodyCount = bodyCount + 1
+            if #physics.gravityObjects > 0 then
+                local position = entity.transform.position
+                local velocity = vector.new(entity.physics.body:getLinearVelocity())
+                local state = vector.new(position, velocity)
+                _, state = self.integrator(0, dt, state, self.gravity, entity)
+                entity.physics.body:setLinearVelocity(state.y:unpack())
+            end
+        end
+    end
 
     self.world:update(dt)
-
 
     for _, entity in pairs(self.entities) do
         if entity.transform.parent == nil then
