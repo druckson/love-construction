@@ -18,17 +18,19 @@ local display = systems.Display()
 local player = systems.Player(display)
 local construction = systems.Construction()
 local electricity = systems.Electricity()
+local light = systems.Light()
 
 engine:addSystem("physics",      physics)
 engine:addSystem("display",      display)
 engine:addSystem("player",       player)
 engine:addSystem("construction", construction)
 engine:addSystem("electricity",  electricity)
+engine:addSystem("light",        light)
 
 function love.load()
     ProFi:start()
     display:setScreenSize(screenSize.x, screenSize.y)
-    local scene = scenes.Scene3(engine)
+    local scene = scenes.Scene2(engine)
 end
 
 function love.keypressed(k)
@@ -41,11 +43,13 @@ end
 
 function love.update(dt)
     dt = math.min(dt, 0.5)
-    physics:update(dt)
-    player:update(dt)
+    --physics:update(dt)
+    --player:update(dt)
+    engine:update(dt)
     engine.messaging:flush()
 end
 
 function love.draw()
     display:display()
+    --engine:display()
 end

@@ -66,4 +66,20 @@ function Engine:removeEntity(entity)
     return self
 end
 
+function Engine:update(...)
+    for _, system in pairs(self.systems) do
+        if system.update then
+            system:update(...)
+        end
+    end
+end
+
+function Engine:display(...)
+    for _, system in pairs(self.systems) do
+        if system.display then
+            system:display(...)
+        end
+    end
+end
+
 return Engine
