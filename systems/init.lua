@@ -3,5 +3,6 @@ return {
     Display = require "systems/display",
     Physics = require "systems/physics",
     Construction = require "systems/construction",
-    Electricity = require "systems/electricity"
+    Electricity = require "systems/electricity",
+    Light = require "systems/light"
 }
