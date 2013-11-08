@@ -10,6 +10,57 @@ local function getColor(data)
     end
 end
 
+local DisplayObject = Class{
+    init = function(self, entity, data)
+        self.entity = entity
+        if data then
+            self.shape = data.shape
+            self.color = getColor(data.color)
+        else
+            self.dummy = true
+        end
+    end
+}
+
+function DisplayObject:display()
+    love.graphics.push()
+    love.graphics.translate(self.entity.transform.position.x, self.entity.transform.position.y)
+    love.graphics.rotate(self.entity.transform.rotation)
+
+    if not self.dummy then 
+        love.graphics.setColor(self.color)
+
+        if self.shape.type == "rectangle" then
+            local width  = self.shape.width
+            local height = self.shape.height
+            love.graphics.rectangle("fill", -width/2, -height/2, width, height)
+        elseif self.shape.type == "square" then
+            local sideLength = self.shape.sideLength
+            love.graphics.rectangle("fill", -sideLength/2, -sideLength/2, sideLength, sideLength)
+        elseif self.shape.type == "circle" then
+            love.graphics.circle("fill", 0, 0, self.shape.radius)
+        elseif self.shape.type == "triangle" then
+            local angle = 0
+            local point = vector.new(self.shape.radius, 0)
+            local coords = {}
+
+            for i = 0, 2 do
+                table.insert(coords, point:rotated(i*2*math.pi/3).x)
+                table.insert(coords, point:rotated(i*2*math.pi/3).y)
+            end
+            love.graphics.polygon("fill", coords)
+        end
+    end
+
+    for _, child in pairs(self.entity.transform.children) do
+        if child.entity.display then
+            child.entity.display:display()
+        end
+    end
+
+    love.graphics.pop()
+end
+
 local Display = Class{
     init = function(self)
         self.screenSize = vector.new(300, 300)
@@ -37,10 +88,9 @@ function Display:init_entity(entity, data)
     if data and 
         data.display and
         not data.display.dummy then
-        entity.display = {
-            shape = data.display.shape,
-            color = getColor(data.display.color),
-        }
+        entity.display = DisplayObject(entity, data.display)
+    else
+        entity.display = DisplayObject(entity)
     end
     table.insert(self.entities, entity)
 end
@@ -48,47 +98,10 @@ end
 function Display:remove_entity(entity)
     for key, value in pairs(self.entities) do
         if value == entity then
+            entity.display = nil
             table.remove(self.entities, key)
         end
     end
-end
-
-function Display:displayChildren(entity)
-    love.graphics.push()
-    love.graphics.translate(entity.transform.position.x, entity.transform.position.y)
-    love.graphics.rotate(entity.transform.rotation)
-
-    if entity.display ~= nil then 
-        love.graphics.setColor(entity.display.color)
-
-        local properties = entity.display.properties
-        if entity.display.shape.type == "rectangle" then
-            local width  = entity.display.shape.width
-            local height = entity.display.shape.height
-            love.graphics.rectangle("fill", -width/2, -height/2, width, height)
-        elseif entity.display.shape.type == "square" then
-            local sideLength = entity.display.shape.sideLength
-            love.graphics.rectangle("fill", -sideLength/2, -sideLength/2, sideLength, sideLength)
-        elseif entity.display.shape.type == "circle" then
-            love.graphics.circle("fill", 0, 0, entity.display.shape.radius)
-        elseif entity.display.shape.type == "triangle" then
-            local angle = 0
-            local point = vector.new(entity.display.shape.radius, 0)
-            local coords = {}
-
-            for i = 0, 2 do
-                table.insert(coords, point:rotated(i*2*math.pi/3).x)
-                table.insert(coords, point:rotated(i*2*math.pi/3).y)
-            end
-            love.graphics.polygon("fill", coords)
-        end
-    end
-
-    for _, child in pairs(entity.transform.children) do
-        self:displayChildren(child.entity)
-    end
-
-    love.graphics.pop()
 end
 
 function Display:setSpeedometer(message)
@@ -129,7 +142,7 @@ function Display:display()
 
     for _, entity in pairs(self.entities) do
         if not entity.transform.parent then
-            self:displayChildren(entity)
+            entity.display:display()
         end
     end
     love.graphics.pop()
