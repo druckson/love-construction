@@ -9,13 +9,7 @@ local Player = Class{
 }
 
 function Player:setup(engine)
-    local player = self
-    engine.messaging:register("init_entity", function(...)
-        player:init_entity(...)
-    end)
-    engine.messaging:register("remove_entity", function(...)
-        player:remove_entity(...)
-    end)
+    self.engine = engine
 end
 
 function Player:init_entity(entity, object)

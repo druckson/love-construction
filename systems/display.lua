@@ -15,12 +15,16 @@ local DisplayObject = Class{
         self.entity = entity
         if data then
             self.shape = data.shape
-            self.color = getColor(data.color)
+            self:setColor(data.color)
         else
             self.dummy = true
         end
     end
 }
+
+function DisplayObject:setColor(data)
+    self.color = getColor(data)
+end
 
 function DisplayObject:display()
     love.graphics.push()
@@ -75,13 +79,7 @@ local Display = Class{
 }
 
 function Display:setup(engine)
-    local display = self
-    engine.messaging:register("init_entity", function(...)
-        display:init_entity(...)
-    end)
-    engine.messaging:register("remove_entity", function(...)
-        display:remove_entity(...)
-    end)
+    self.engine = engine
 end
 
 function Display:init_entity(entity, data)

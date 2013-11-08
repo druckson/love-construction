@@ -1,9 +1,14 @@
 local Class = require "lib/hump/class"
 
 local Node = Class{
-    init = function(self, throughput)
-        self.outputCapacity = 0
-        self.inputCapacity = 0
+    init = function(self, entity, data)
+        self.entity = entity
+
+        self.inputCapacity = data.inputCapacity or 0
+        self.outputCapacity = data.outputCapacity or 0
+
+        self.draw = 0
+        self.drain = 0
 
         self.throughput = throughput
         self.peers = {}
@@ -15,11 +20,11 @@ function Node:potentialOutput()
 end
 
 function Node:addPower(p)
-
+    self.draw = 1
 end
 
 function Node:removePower(p)
-
+    self.drain = p
 end
 
 function Node:link(other)
@@ -27,7 +32,11 @@ function Node:link(other)
     table.insert(other.peers, self)
 end
 
+local t = 0
 function Node:update(dt)
+    -- TEST
+    t = t + dt*5
+    self.draw = (math.sin(t) + 1)/2
 end
 
 local Circuit = Class{
@@ -71,15 +80,6 @@ local Electricity = Class{
 function Electricity:setup(engine)
     local electricity = self
 
-    engine.messaging:register("init_entity", function(entity, data)
-        entity.electricity = Node(data.inputCapacity, data.outputCapacity)
-        table.insert(self.entities, entity)
-    end)
-
-    engine.messaging:register("remove_entity", function(...)
-        electricity:remove_entity(...)
-    end)
-
     -- Generate/update circuits
     engine.messaging:register("connect", function(entity1, entity2)
         if entity1.electricity and 
@@ -87,6 +87,19 @@ function Electricity:setup(engine)
             entity1.electricity:link(entity2.electricity)
         end
     end)
+end
+
+function Electricity:init_entity(entity, data)
+    entity.electricity = Node(entity, data)
+    table.insert(self.entities, entity)
+end
+
+function Electricity:remove_entity(entity)
+    for key, value in pairs(electricity.entities) do
+        if value == entity then
+            table.remove(electricity.entities, key)
+        end
+    end
 end
 
 function Electricity:update(dt)

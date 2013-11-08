@@ -63,13 +63,6 @@ local Physics = Class{
 
 function Physics:setup(engine)
     self.engine = engine
-    local physics = self
-    engine.messaging:register("init_entity", function(...)
-        physics:init_entity(...)
-    end)
-    engine.messaging:register("remove_entity", function(...)
-        physics:remove_entity(...)
-    end)
 end
 
 function Physics:beginContact(a, b, collision)
