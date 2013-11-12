@@ -7,12 +7,14 @@ local Engine = Class{
     init = function(self)
         self.messaging = Messaging()
         self.systems = {}
+        self.systems_ordered = {}
         self.entities = {}
     end
 }
 
 function Engine:addSystem(name, system)
     self.systems[name] = system
+    table.insert(self.systems_ordered, system)
     system:setup(self)
 
     return self
@@ -67,7 +69,7 @@ function Engine:removeEntity(entity)
 end
 
 function Engine:update(...)
-    for _, system in pairs(self.systems) do
+    for _, system in pairs(self.systems_ordered) do
         if system.update then
             system:update(...)
         end
