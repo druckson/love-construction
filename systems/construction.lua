@@ -23,8 +23,11 @@ function Construction:setup(engine)
             entity2.construction and
             entity1.construction.type == "socket" and
             entity2.construction.type == "socket" and
-            not entity1.construction.connected and 
-            not entity2.construction.connected then
+            (not entity1.construction.connected) and 
+            (not entity2.construction.connected) then
+
+            entity1.construction.connected = true
+            entity2.construction.connected = true
             engine.messaging:emit("connect", entity1, entity2)
         end
         return true
@@ -35,8 +38,8 @@ function Construction:setup(engine)
     end)
 
     engine.messaging:register("disconnect", function(entity1, entity2)
-        entity1.construction.connected = false
-        entity2.construction.connected = false
+        --entity1.construction.connected = false
+        --entity2.construction.connected = false
     end)
 end
 
@@ -181,9 +184,7 @@ function Construction:connect(o1, o2)
     local o1BaseAncestor = o1.transform:getBaseAncestor().entity
     local o2BaseAncestor = o2.transform:getBaseAncestor().entity
 
-    if  o1BaseAncestor ~= o2BaseAncestor and
-        (not o1.construction.connected) and 
-        (not o2.construction.connected) then
+    if  o1BaseAncestor ~= o2BaseAncestor then
 
         if o1BaseAncestor.physics.body:getMass() > o2BaseAncestor.physics.body:getMass() then
             self:positionObjects(o2, o2BaseAncestor, o1, o1BaseAncestor)
@@ -191,11 +192,11 @@ function Construction:connect(o1, o2)
             self:positionObjects(o1, o1BaseAncestor, o2, o2BaseAncestor)
         end
 
-        local x1, y1, mass1 = o1BaseAncestor.physics.body:getMassData()
+        local mass1 = o1BaseAncestor.physics.body:getMass()
         local force1 = vector.new(o1BaseAncestor.physics.body:getLinearVelocity()) * mass1
         local torque1 = o1BaseAncestor.physics.body:getAngularVelocity() * mass1
 
-        local x2, y2, mass2 = o2BaseAncestor.physics.body:getMassData()
+        local mass2 = o2BaseAncestor.physics.body:getMass()
         local force2 = vector.new(o2BaseAncestor.physics.body:getLinearVelocity()) * mass1
         local torque2 = o2BaseAncestor.physics.body:getAngularVelocity() * mass2
 
@@ -210,7 +211,7 @@ function Construction:connect(o1, o2)
             self.engine:removeEntity(o2BaseAncestor)
         end
 
-        local newMass = newObject.physics.body:getMass()
+        local newMass = mass1 + mass2--newObject.physics.body:getMass()
 
         newObject.physics.body:setLinearVelocity(((force1 + force2) / newMass):unpack())
         newObject.physics.body:setAngularVelocity((torque1 + torque2) / newMass)
