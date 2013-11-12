@@ -27,9 +27,19 @@ function DisplayObject:setColor(data)
 end
 
 function DisplayObject:display()
+    --love.graphics.push()
+    --love.graphics.translate(self.entity.transform.position.x, self.entity.transform.position.y)
+    --love.graphics.scale(0.05)
+    --if self.entity.physics.body then
+    --    local vx, vy = self.entity.physics.body:getLinearVelocity()
+    --    love.graphics.setColor(255, 255, 255, 255)
+    --    love.graphics.rectangle("fill", vy*0.1, vx*0.1, vx*2, vy*2)
+    --end
+    --love.graphics.pop()
+
     love.graphics.push()
-    love.graphics.translate(self.entity.transform.position.x, self.entity.transform.position.y)
-    love.graphics.rotate(self.entity.transform.rotation)
+    love.graphics.translate(self.entity.transform:getAbsolutePosition():unpack())
+    love.graphics.rotate(self.entity.transform:getAbsoluteRotation())
 
     if not self.dummy then 
         love.graphics.setColor(self.color)
@@ -53,12 +63,6 @@ function DisplayObject:display()
                 table.insert(coords, point:rotated(i*2*math.pi/3).y)
             end
             love.graphics.polygon("fill", coords)
-        end
-    end
-
-    for _, child in pairs(self.entity.transform.children) do
-        if child.entity.display then
-            child.entity.display:display()
         end
     end
 
@@ -139,12 +143,11 @@ function Display:display()
     love.graphics.translate(-self.camera.position.x, -self.camera.position.y)
 
     for _, entity in pairs(self.entities) do
-        if not entity.transform.parent then
-            entity.display:display()
-        end
+        entity.display:display()
     end
     love.graphics.pop()
 
+    love.graphics.setColor(255, 255, 255, 255)
     love.graphics.print("FPS: "..love.timer.getFPS(), 10, 10)
     love.graphics.print("Speed: "..self.speedometer, 10, 20)
 end
