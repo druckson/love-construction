@@ -29,11 +29,11 @@ end
 
 function Player:update(dt)
     if self.entity ~= nil then
-        local moveSpeed = 20
+        local moveSpeed = 0.2
         local moveForward = 0
         local moveSideways = 0
 
-        local turnSpeed = 1
+        local turnSpeed = 0.1
         local turn = 0
 
         if love.keyboard.isDown("w") then moveForward = moveForward - moveSpeed end

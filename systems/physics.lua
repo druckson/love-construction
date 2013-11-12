@@ -7,13 +7,16 @@ local Class = require "lib/hump/class"
 local shapes = require "utils/shapes"
 
 local Physics = Class{
-    init = function(self, integrator)
+    init = function(self, integrator, worldScale)
         local physics = self
 
+        worldScale = worldScale or 10
+
+        self.worldScale = worldScale
         self.integrator = integrator
         self.world = love.physics.newWorld(0, 0, true)
         --self.world:setGravity(0, -9.8)
-        love.physics.setMeter(1)
+        love.physics.setMeter(worldScale or 10)
 
         self.world:setCallbacks(function(...)
             self:beginContact(...)
@@ -27,6 +30,7 @@ local Physics = Class{
 
         self.entities = {}
         self.gravityObjects = {}
+        self.gravitationalConstant = worldScale * worldScale
 
         self.gravity = function(_, state, entity)
             local position = state.x
@@ -37,8 +41,9 @@ local Physics = Class{
                 if gravityObject ~= entity then
                     local gravityVector = (gravityObject.transform.position - position)
                     local gravityDist2 = gravityVector:len2()
-                    local mass = gravityObject.physics.body:getMass()
-                    acceleration = acceleration + (gravityVector:normalized() * (mass / gravityDist2))
+                    local _, _, mass = gravityObject.physics.fixture:getMassData()
+
+                    acceleration = acceleration + (physics.gravitationalConstant * gravityVector:normalized() * (mass / gravityDist2))
             
                     -- Add atmosphere
                     --local radius = gravityObject.physics.gravity.atmosphere.radius
@@ -113,8 +118,8 @@ function Physics:enable_physics(entity, recurse)
         body:setAngle(-entity.transform:getAbsoluteRotation())
 
         if entity.physics.data.velocity then
-            body:setLinearVelocity(entity.physics.data.velocity[1], 
-                                   entity.physics.data.velocity[2])
+            body:setLinearVelocity(entity.physics.data.velocity[1] / self.worldScale, 
+                                   entity.physics.data.velocity[2] / self.worldScale)
         end
 
         if entity.physics.data.gravity then
@@ -139,6 +144,7 @@ function Physics:enable_physics(entity, recurse)
             local  fixture = love.physics.newFixture(body, shape,
                                   entity.physics.data.density or 1)
             fixture:setUserData(entity)
+            --fixture:setRestitution(0.5)
 
             if groupIndex then
                 fixture:setGroupIndex(groupIndex)
@@ -210,7 +216,7 @@ function Physics:update(dt)
     self.world:update(dt)
 
     for _, entity in pairs(self.entities) do
-        if entity.transform.parent == nil then
+        if entity.physics.body then
             entity.transform.position = vector.new(entity.physics.body:getPosition())
             entity.transform.rotation = entity.physics.body:getAngle()
         end
