@@ -59,7 +59,7 @@ function Player:update(dt)
         --self.entity.player.cameraAngle = math.pi + velocity:angleTo()
         self.entity.player.cameraAngle = rotation
 
-        local zoomSpeed = dt*10
+        local zoomSpeed = dt*1
         local zoom = 0
         if love.keyboard.isDown("x") then zoom = zoom + zoomSpeed end
         if love.keyboard.isDown("c") then zoom = zoom - zoomSpeed end
@@ -68,6 +68,11 @@ function Player:update(dt)
                          vector.new(-moveSideways, moveForward)
 
         local parent = self.entity.transform:getBaseAncestor().entity
+
+        if self.entity.electricity then
+            velocity = velocity * self.entity.electricity.draw
+            turn = turn * self.entity.electricity.draw
+        end
 
         parent.physics.body:applyForce(velocity:unpack())
         parent.physics.body:applyTorque(turn)
@@ -80,6 +85,13 @@ function Player:update(dt)
         self.display:rotateCamera(self.entity.player.cameraAngle)
         self.display:zoomCamera(self.entity.player.zoom)
         self.display:setSpeedometer(vector.new(parent.physics.body:getLinearVelocity()):len())
+
+        if self.entity.generator then
+            self.display:setFuel(self.entity.generator.fuel)
+        end
+        if self.entity.electricity then
+            self.display:setBattery(self.entity.electricity.outputCharge)
+        end
     end
 end
 
