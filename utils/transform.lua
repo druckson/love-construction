@@ -35,9 +35,12 @@ function Transform:setAbsolute()
     self:setMatrix(self:getAbsoluteMatrix())
 end
 
+function Transform:getChangeOfBasis()
+    return Matrix.rotate(-self.rotation) * Matrix.translate(-self.position.x, -self.position.y)
+end
+
 function Transform:setRelative(parent)
-    local changeOfBasis = Matrix.rotate(-parent.rotation) * Matrix.translate(-parent.position.x, -parent.position.y)
-    self:setMatrix(changeOfBasis * self:getAbsoluteMatrix())
+    self:setMatrix(parent:getChangeOfBasis() * self:getAbsoluteMatrix())
 end
 
 function Transform:getBaseAncestor()
