@@ -64,11 +64,12 @@ function Scene:createStaticBox(engine, position, color, rotation, width, height)
             }
         },
         display = {
-            color = color,
-            shape = {
+            {
                 type = "rectangle",
                 width = width,
-                height = height
+                height = height,
+                color = color,
+                depth = 0
             }
         }
     }
@@ -90,15 +91,14 @@ function Scene:createJoinPoint(engine, parent, position, color, rotation)
             shape = {
                 type = "circle",
                 segments = 7,
-                radius = 0.03
+                radius = 0.1
             }
         },
         --display = {
+        --    type = "triangle",
         --    color = color,
-        --    shape = {
-        --        type = "triangle",
-        --        radius = 0.1
-        --    }
+        --    depth = 0,
+        --    radius = 0.1
         --},
         construction = {
             type = "socket"
@@ -122,10 +122,11 @@ function Scene:createTriangle(engine, position, color, rotation, density, isPlay
             }
         },
         display = {
-            color = color,
-            shape = {
+            {
                 type = "triangle",
-                radius = 1
+                radius = 1,
+                color = color,
+                depth = 0,
             }
         }
     }
@@ -168,10 +169,11 @@ function Scene:createBlock(engine, position, color, rotation, density, isPlayer,
             }
         },
         display = {
-            color = color,
-            shape = {
+            {
                 type = "square",
-                sideLength = 1
+                sideLength = 1,
+                color = color,
+                depth = 0
             }
         }
     }
@@ -184,6 +186,30 @@ function Scene:createBlock(engine, position, color, rotation, density, isPlayer,
     if isPlayer then
         mainBlock.player = {
             zoom = 1
+        }
+    
+        mainBlock.display = {
+            {
+                type = "image",
+                width = 1,
+                height = 1,
+                image = "images/brickn",
+                shader = "shaders/normal"
+            }
+        }
+
+        mainBlock.electricity = {
+            inputCapacity = 1,
+            outputCapacity = 1,
+            charge = 1
+        }
+        mainBlock.generator = {
+            burnSpeed = 1.0,
+            fuel = 100
+        }
+        mainBlock.light = {
+            fullCharge = 1,
+            color = {space="hsva", h=0, s=0.7, v=0.7, a=1}
         }
 
         entity = engine:createEntity(mainBlock)

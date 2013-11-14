@@ -21,14 +21,14 @@ local Scene = Class{
         local gr = iterateGR(0)
 
         --self:createGlobe(engine, {    0, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  2000,  0, 1)
-        self:createGlobe(engine, { 10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  500, 20, 1)--, {0, -100})
-        --self:createGlobe(engine, {-10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  500, 20, 1)--, {0,  100})
+        self:createGlobe(engine, { 10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  500, 20, 1, {0, -100})
+        --self:createGlobe(engine, {-10000, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0},  500, 20, 1, {0,  100})
 
-        local blockVel = {0, 50}
+        local blockVel = {0, 100}
 
         self:createBlock(engine, { 10850, 0}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, true, blockVel)
-        for x = 1, 6 do
-            for y = 0, 4 do
+        for x = 1, 8 do
+            for y = 1, 8 do
                 self:createBlock(engine, { 10850+x*2, y*2}, {space="hsva", h=gr(), s=0.7, v=0.7, a=1.0}, math.random()*2*math.pi, 1, false, blockVel)
             end
         end
@@ -85,6 +85,10 @@ function Scene:createBlock(engine, position, color, rotation, density, isPlayer,
                 type = "square",
                 sideLength = 1
             }
+        },
+        thruster = {
+            power = 0.0,
+            angle = math.random() *2*math.pi
         }
     }
 
@@ -112,7 +116,7 @@ function Scene:createGlobe(engine, position, color, radius, atmosphere_level, de
             rotation = 0
         },
         physics = {
-            bodyType = "dynamic",
+            bodyType = "kinematic",
             density = density,
             shape = {
                 type = "circle",
@@ -128,6 +132,7 @@ function Scene:createGlobe(engine, position, color, radius, atmosphere_level, de
             }
         },
         display = {
+            type = "shape",
             shape = {
                 type = "circle",
                 segments = 100,
