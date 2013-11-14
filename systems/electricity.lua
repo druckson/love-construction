@@ -1,49 +1,22 @@
 local Class = require "lib/hump/class"
 
-local Node = Class{
-    init = function(self, entity, data)
-        self.entity = entity
-
-        self.inputCapacity = data.inputCapacity or 0
-        self.outputCapacity = data.outputCapacity or 0
-
-        self.draw = 0
-        self.drain = 0
-
-        self.throughput = throughput
-        self.peers = {}
-    end
-}
-
-function Node:potentialOutput()
-    return math.min(self.outputCapacity, self.outputPower)
-end
-
-function Node:addPower(p)
-    self.draw = 1
-end
-
-function Node:removePower(p)
-    self.drain = p
-end
-
-function Node:link(other)
-    table.insert(self.peers, other)
-    table.insert(other.peers, self)
-end
-
-local t = 0
-function Node:update(dt)
-    -- TEST
-    t = t + dt*5
-    self.draw = (math.sin(t) + 1)/2
-end
-
 local Circuit = Class{
     init = function(self)
         self.nodes = {}
     end
 }
+
+function Circuit:addNode(node)
+    table.insert(self.nodes, node)
+    return self
+end
+
+function Circuit:join(other)
+    for _, node in pairs(other.nodes) do
+        self.addNode(other)
+    end
+    return self
+end
 
 function Circuit:update(dt)
     -- Calculate the input and output currents for each node
@@ -65,9 +38,69 @@ function Circuit:update(dt)
     local totalFlux = math.min(desiredInput, potentialOutput)
 
     for _, node in pairs(self.nodes) do
-        node:addPower(totalFlux * node.inputCapacity / desiredInput)
-        node:removePower(totalFlux * node:potentialOutput() / potentialOutput)
+        if desiredInput == 0 then
+            node:addPower(0, dt)
+        else
+            node:addPower(totalFlux * node.inputCapacity / desiredInput, dt)
+        end
+
+        if potentialOutput == 0 then
+            node:removePower(0, dt)
+        else
+            node:removePower(totalFlux * node:potentialOutput() / potentialOutput, dt)
+        end
     end
+end
+
+local Node = Class{
+    init = function(self, entity, data)
+        self.entity = entity
+
+        self.circuit = Circuit()
+        self.circuit:addNode(self)
+
+        self.inputCapacity = data.electricity.inputCapacity or 0
+        self.outputCapacity = data.electricity.outputCapacity or 0
+        self.outputCharge = data.electricity.charge or 0
+        self.fullCharge = 5
+
+        self.draw = 0
+        self.drain = 0
+
+        self.throughput = throughput
+        self.peers = {}
+    end
+}
+
+function Node:potentialOutput()
+    return math.min(self.outputCapacity, self.outputCharge)
+end
+
+function Node:addPower(p, dt)
+    self.draw = p
+end
+
+function Node:removePower(p, dt)
+    self.outputCharge = self.outputCharge - (p*dt)
+    --self.outputCapacity = self.outputCharge / self.fullCharge
+    self.drain = p
+end
+
+function Node:link(other)
+    table.insert(self.peers, other)
+    table.insert(other.peers, self)
+end
+
+local t = 0
+function Node:update(dt)
+    -- TEST
+    t = t + dt*5
+    --self.draw = (math.sin(t) + 1)/2
+    --if math.random() > 0.95 then
+    --    self.draw = 0
+    --else
+    --    self.draw = 1
+    --end
 end
 
 local Electricity = Class{
@@ -85,12 +118,21 @@ function Electricity:setup(engine)
         if entity1.electricity and 
            entity2.electricity then
             entity1.electricity:link(entity2.electricity)
+            if entity1.circuit ~= entity2.circuit then
+                entity1.circuit:join(entity2.circuit)
+                entity2.circuit = entity1.circuit
+            end
         end
     end)
 end
 
+function Electricity:removeCircuit(circuit)
+
+end
+
 function Electricity:init_entity(entity, data)
     entity.electricity = Node(entity, data)
+    table.insert(self.circuits, entity.electricity.circuit)
     table.insert(self.entities, entity)
 end
 
@@ -105,6 +147,9 @@ end
 function Electricity:update(dt)
     for _, entity in pairs(self.entities) do
         entity.electricity:update(dt)
+    end
+    for _, circuit in pairs(self.circuits) do
+        circuit:update(dt)
     end
 end
 
