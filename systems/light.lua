@@ -31,7 +31,7 @@ function Light:update(dt)
     for _, entity in pairs(self.entities) do
         local draw = entity.electricity.draw
         local color = entity.light.color
-        color.v = ((draw / entity.light.fullCharge))
+        color.v = 0.2 + 0.8*((draw / entity.light.fullCharge))
         entity.display:setColor(color)
     end
 end

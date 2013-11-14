@@ -12,7 +12,8 @@ end
 
 function Generator:init_entity(entity, data)
     entity.generator = {
-        charge = 1000
+        burnSpeed = data.generator.burnSpeed,
+        fuel = data.generator.fuel
     }
     table.insert(self.entities, entity)
 end
@@ -28,11 +29,14 @@ end
 
 function Generator:update(dt)
     for _, entity in pairs(self.entities) do
-        if math.random() > 0.95 then
-            entity.electricity.outputCharge = 1
-        else
-            entity.electricity.outputCharge = 0
-        end
+        --local parent = entity.transform:getBaseAncestor()
+        --local x, y = parent.entity.physics.body:getLinearVelocity()
+        --local power = math.abs(x) + math.abs(y)
+        --entity.electricity.outputCharge = entity.electricity.outputCharge + (0.1 * power * dt)
+
+        local burn = math.min(entity.generator.burnSpeed*dt, entity.generator.fuel)
+        entity.generator.fuel = entity.generator.fuel - burn
+        entity.electricity.outputCharge = entity.electricity.outputCharge + burn
     end
 end
 
